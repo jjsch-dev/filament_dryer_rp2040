@@ -44,7 +44,7 @@ public:
     int get_setpoint(void);
     int get_mode(void);
     void set_mode(int mode);
-    int tuning_percentage(void );
+    float tuning_percentage(void );
   
 private:
     PID         pid; //(&pid_input, &pid_output, &pid_setpoint, BOX_KP, BOX_KI, BOX_KD, DIRECT); 
@@ -70,7 +70,7 @@ private:
     float             tune_output_step;
     float             tune_temp_limit;
     uint8_t           tune_debounce;
-    int               tune_samples_count;
+    uint16_t          tune_samples_count;
 
     
     float           tune_input;

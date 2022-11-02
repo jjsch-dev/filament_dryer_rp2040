@@ -54,7 +54,7 @@ float output = 0;
   } else if (_mode == MODE_RUN_TUNE){
     output = tune_controller(box_temp);
   }
-  
+
   pwm(output);
    
   return output;
@@ -148,9 +148,6 @@ float HeaterController::pid_controller(float input, float bed_left_temp, float b
 }
 
 float HeaterController::tune_controller(float input) {
-float output = 0;
-
-  Serial.println(tune_status);
   
   if (tune_status == ST_INITIALICE) {
     pid_status =  ST_DISABLED;
@@ -159,16 +156,15 @@ float output = 0;
     fan_cooler(OUT_ON); 
     pid_setpoint = 0;
     //set_time = 0;
-    //tuner.Reset();
+    tuner.Reset();
     tune_samples_count = 0;
     tune_status = ST_RUN_PID;
   } else if(tune_status == ST_RUN_PID) {
     uint8_t state = tuner.Run();
-    Serial.print("state: "); Serial.println(state);
+    
     switch (state) {
       case tuner.sample: // active once per sample during test
         tune_input = input;
-        output = tune_output;
         tune_samples_count++;
       break;
   
@@ -185,13 +181,18 @@ float output = 0;
       break;
     } 
   }
-  
-  return output;
+
+  return tune_output;
 }
 
-int HeaterController::tuning_percentage(void ) {
-  int total = tune_samples_count/tune_samples;
+float HeaterController::tuning_percentage(void ) {
+  float total = tune_samples_count;
+  total /= tune_samples;
   total *= 100;
 
+  Serial.print("tune_samples_count: "); Serial.println(tune_samples_count); 
+  Serial.print("tune_samples: "); Serial.println(tune_samples);
+  Serial.print("total: "); Serial.println(total);
+  
   return total;
 }
