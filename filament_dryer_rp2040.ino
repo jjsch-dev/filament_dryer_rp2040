@@ -24,12 +24,14 @@
 
 #define SAMPLE_TIMEOUT_100MS  100     // Refresh time for the sensor
 
+#define PWM_FREQUENCY         500     // Set a similar frequency of the Arduino Nano PWM (490Hz).
+
 int               set_time;
 uint8_t           menu_sel = 0;
 uint8_t           refresh_display = 10;
 
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS);
-HeaterController  heater;
+HeaterController  heater(PWM_FREQUENCY);
 Adafruit_SSD1306  display(SCREEN_WIDTH, SCREEN_HEIGHT, &OLED_WIRE, OLED_RESET); 
 EncoderButton     *eb; 
 
@@ -154,7 +156,6 @@ void plot_pid(float input, float output, float setpoint) {
   }
 }
 
-
 /*
  * Show introduction message when USB serial port is connected.
  */
@@ -216,7 +217,7 @@ void loop() {
   /*
    * Shows status information, when not in setup mode
    */
-  if ((menu_sel == 0) && (refresh_display >= 5)) {
+  if ((menu_sel == 0) && (refresh_display >= 10)) {
     refresh_display = 0;
     update_display_info();
   }
@@ -230,7 +231,7 @@ void loop() {
    * to use the Arduino Plotter to plot the system response.
    * Note: The output is converted to a percentage.
    */
-  if (refresh_display == 0) { 
+  if ((refresh_display == 0) && (heater.get_mode() != MODE_STOP)) { 
     plot_pid(sensors.box_celcius(), (pwm_val/255.0f)*100, heater.get_setpoint()); 
   }
 }

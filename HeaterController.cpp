@@ -1,12 +1,13 @@
 #include "HeaterController.h"
 
-HeaterController::HeaterController() :
+HeaterController::HeaterController(int pwm_freq) :
                   pid(&pid_input, &pid_output, &pid_setpoint, KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, DIRECT),
                   pid_const(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT),
                   tuner(&tune_input, &tune_output, tuner.ZN_PID, tuner.directIP, tuner.printOFF) {    
     _mode = MODE_STOP;
     pid_status = ST_DISABLED;
     tune_status = ST_DISABLED;    
+    pwm_frequency = pwm_freq;
     
     tune_settle_time_sec = 10;
     tune_test_time_sec = 500;     // runPid interval = testTimeSec / samples
@@ -39,6 +40,8 @@ bool ret_val;
     if ((ret_val = pid_const.begin())) {
         pid.SetTunings(pid_const.kp(), pid_const.ki(), pid_const.kd());  
     }
+
+    analogWriteFreq(pwm_frequency);
     
     fan_cooler(OUT_OFF);
     pwm(OUT_OFF);
