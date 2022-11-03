@@ -2,7 +2,7 @@
 #ifndef PID_CONSTATS_H_
 #define PID_CONSTATS_H_
 
-#define CONST_INITED        0x434f4e53        // ASCII = CONS
+#define CONST_INITED        0x434f4e13 //53        // ASCII = CONS
 
 #define ADDRESS_MAGIC_NUM   0
 #define ADDRESS_KP          ADDRESS_MAGIC_NUM + sizeof(int)

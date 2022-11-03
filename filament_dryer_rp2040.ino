@@ -24,21 +24,19 @@
 
 #define SAMPLE_TIMEOUT_100MS  100     // Refresh time for the sensor
 
-int               set_temp;
 int               set_time;
 uint8_t           menu_sel = 0;
+uint8_t           refresh_display = 10;
 
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS);
 HeaterController  heater;
 Adafruit_SSD1306  display(SCREEN_WIDTH, SCREEN_HEIGHT, &OLED_WIRE, OLED_RESET); 
 EncoderButton     *eb; 
 
-uint8_t           refresh_display = 10;
-
 /*
- * Shows the static configuration menu.
+ * Shows the configuration menu.
  */
-void static_menu() {
+void display_menu() {
   display.clearDisplay();            // Clear the display everytime
   display.setTextColor(WHITE);
   display.setTextSize(2);
@@ -67,13 +65,50 @@ void static_menu() {
   display.display();
 }
 
+/*
+ * Shows the runining information.
+ */
+void update_display_info() {
+  display.clearDisplay();             // Clear the display everytime
+  display.setTextSize(2);             // Setting the text size and color         
+  display.setTextColor(WHITE);             
+  display.setCursor(0,0);             // Setting the cursor position
+
+  display.print(sensors.box_celcius(), 1);        
+  display.print("/");
+  display.print(heater.get_setpoint());
+  display.print(" ");
+  display.print((char)247);            
+  display.print("C");
+
+  display.setCursor(0,22);
+  display.print("Bed "); 
+  display.print(sensors.bed_left_celcius(), 0);
+  display.print("-");
+  display.print(sensors.bed_right_celcius(), 0);
+  display.print((char)247);
+
+  display.setCursor(0,42); 
+  if (heater.get_mode() == MODE_RUN_TUNE) {
+    display.print("Tune: ");
+
+    display.print(heater.tuning_percentage(), 1);
+  } else {
+    display.print("H: ");
+    display.print(sensors.box_humidity(), 1);  //                                          
+  }
+  display.print(" %");
+  
+  display.display();                 // The display takes effect
+}
+
 /**
  * A function to handle the 'clicked' event
  */
 void on_click(EncoderButton& eb) {
 
   if (menu_sel++ < 3) {
-    static_menu();
+    display_menu();
   } else {
     menu_sel = 0;
     
@@ -106,25 +141,45 @@ int new_val;
       heater.set_mode((eb.increment() > 0) ? MODE_RUN_TUNE : MODE_STOP);
     }
   
-    static_menu();
+    display_menu();
   }
 }
 
-void plot_values(float input, float output, float setpoint) {
- /*Serial.print(F("Setpoint:"));  Serial.print(setpoint);  Serial.print(F(", "));
- Serial.print(F("Input:"));     Serial.print(input);     Serial.print(F(", "));
- Serial.print(F("Output:"));    Serial.print(output);    Serial.print(F(","));
- Serial.println();
-*/}
+void plot_pid(float input, float output, float setpoint) {
+  if (Serial) {  
+    Serial.print(F("Setpoint:"));  Serial.print(setpoint);  Serial.print(F(", "));
+    Serial.print(F("Input:"));     Serial.print(input);     Serial.print(F(", "));
+    Serial.print(F("Output:"));    Serial.print(output);    Serial.print(F(","));
+    Serial.println();
+  }
+}
 
+
+/*
+ * Show introduction message when USB serial port is connected.
+ */
+void show_intro_msg(void) {
+static bool do_it = false;
+  
+  if (Serial) {
+    if (!do_it) {
+      Serial.println("Filament dryer controller.");
+      Serial.print("Kp: "); Serial.print(heater.pid_const.kp());
+      Serial.print(" Ki: "); Serial.print(heater.pid_const.ki());
+      Serial.print(" Kd: "); Serial.println(heater.pid_const.kd());
+      do_it = true;
+    }
+  } else {
+    do_it = false;
+  }
+}
+  
 /**
  * 
  */
 void setup() {
   Serial.begin(115200);
-  delay(500);
-  Serial.println("Filament dryer controller.");
-
+  
   /*
    * With a global instance of the object, the constructor is called before the Arduino 
    * core is initialized, and the attachInterrupt() function does not work. 
@@ -149,6 +204,8 @@ void setup() {
 }
 
 void loop() {
+  show_intro_msg();
+  
   eb->update();
 
   // Update sensor values every 100 mS.
@@ -161,44 +218,19 @@ void loop() {
    */
   if ((menu_sel == 0) && (refresh_display >= 5)) {
     refresh_display = 0;
-    
-    display.clearDisplay();             // Clear the display everytime
-    display.setTextSize(2);             // Setting the text size and color         
-    display.setTextColor(WHITE);             
-    display.setCursor(0,0);             // Setting the cursor position
-    display.print("T: ");               // Display the temperature and humidity as "T: 24.6/60 
-    display.print(sensors.box_celcius(), 1);         //                                          H: 59.1 %
-    display.print("/");
-    display.print(set_temp);
-    //display.print(" C");              //                                          23.5 23.4"
-    display.setCursor(0,22); 
-    //display.print("B");
-    display.print(sensors.bed_left_celcius(), 1);
-    display.print(" ");
-    display.print(sensors.bed_right_celcius(), 1);
-    //display.print(" C");
-
-    display.setCursor(0,42); 
-    if (heater.get_mode() == MODE_RUN_TUNE) {
-      display.print("Tune: ");
-
-      display.print(heater.tuning_percentage(), 1);
-    } else {
-      display.print("H: ");
-      display.print(sensors.box_humidity(), 1);
-      display.print(" %");
-    } 
-    
-    display.display();                 // The display takes effect
+    update_display_info();
   }
-
+  
   float pwm_val = heater.update(sensors.box_celcius(), 
-                          sensors.bed_left_celcius(),
-                          sensors.bed_right_celcius());
+                                sensors.bed_left_celcius(),
+                                sensors.bed_right_celcius());
 
+  /*
+   * Record the input, output, and setpoint values of the PID and tuner, 
+   * to use the Arduino Plotter to plot the system response.
+   * Note: The output is converted to a percentage.
+   */
   if (refresh_display == 0) { 
-    plot_values(sensors.box_celcius(), 
-                (pwm_val/255.0f)*100, 
-                heater.get_setpoint()); 
+    plot_pid(sensors.box_celcius(), (pwm_val/255.0f)*100, heater.get_setpoint()); 
   }
 }

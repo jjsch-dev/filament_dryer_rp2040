@@ -77,22 +77,27 @@ int HeaterController::get_mode(void) {
     return _mode;
 }
 
-void HeaterController::set_mode(int val) {
-  if (_mode != MODE_STOP) {
+void HeaterController::set_mode(int new_mode) {
+
+  /* 
+   *  If the mode is to stop the heater, it turns off the fan and the PWM output. 
+   *  Initializes the PID or Tuner when the previous mode is different from the current one.
+   */
+  if (new_mode == MODE_STOP) {
     pid_setpoint = 0;
     fan_cooler(OUT_OFF);
     pwm(OUT_OFF);
     pid_status = ST_DISABLED;
     tune_status = ST_DISABLED;
   }
-
-  _mode = val;
   
-  if (_mode == MODE_RUN_TUNE) {
+  if ((new_mode == MODE_RUN_TUNE) && (_mode != MODE_RUN_TUNE)) {
     tune_status = ST_INITIALICE;  
-  } else if (_mode == MODE_RUN_PID) {
+  } else if ((new_mode == MODE_RUN_PID) && (_mode != MODE_RUN_PID)) {
     pid_status = ST_INITIALICE;
   }
+
+  _mode = new_mode;
 }
     
 void HeaterController::pwm(int output) {
@@ -176,8 +181,7 @@ float HeaterController::tune_controller(float input) {
         
         pid.SetTunings(kp, ki, kd); // update PID with the new tunings
         tuner.printTunings();
-        pid_status = ST_DISABLED;
-        fan_cooler(OUT_OFF); 
+        set_mode(MODE_STOP); 
       break;
     } 
   }
@@ -185,14 +189,15 @@ float HeaterController::tune_controller(float input) {
   return tune_output;
 }
 
-float HeaterController::tuning_percentage(void ) {
+int HeaterController::tuning_percentage(void) {
+  /*
+   * The tuner takes a sample every 1000 mS, both in the setup time and in the 
+   * computation time. In order for the percentage to match the number of samples, 
+   * the waiting seconds must be added to the total.
+   */
   float total = tune_samples_count;
-  total /= tune_samples;
+  total /= (tune_samples + tune_settle_time_sec);
   total *= 100;
-
-  Serial.print("tune_samples_count: "); Serial.println(tune_samples_count); 
-  Serial.print("tune_samples: "); Serial.println(tune_samples);
-  Serial.print("total: "); Serial.println(total);
   
   return total;
 }

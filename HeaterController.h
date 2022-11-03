@@ -44,12 +44,13 @@ public:
     int get_setpoint(void);
     int get_mode(void);
     void set_mode(int mode);
-    float tuning_percentage(void );
-  
+    int tuning_percentage(void );
+
+    PIDConst    pid_const;
+    
 private:
-    PID         pid; //(&pid_input, &pid_output, &pid_setpoint, BOX_KP, BOX_KI, BOX_KD, DIRECT); 
-    sTune       tuner; // =     sTune(&tune_input, &tune_output, tuner.ZN_PID, tuner.directIP, tuner.printOFF);
-    PIDConst    pid_const; //(BOX_KP, BOX_KI, BOX_KD);
+    PID         pid;  
+    sTune       tuner; 
     
     int   _mode;
     int   pid_status;
@@ -61,21 +62,21 @@ private:
 
 private:
 
-    uint32_t          tune_settle_time_sec;
-    uint32_t          tune_test_time_sec;     // runPid interval = testTimeSec / samples
-    /*const*/ uint16_t    tune_samples;
-    /*const*/ float       tune_input_span;
-    /*const*/ float       tune_output_span;
-    float             tune_output_start;
-    float             tune_output_step;
-    float             tune_temp_limit;
-    uint8_t           tune_debounce;
-    uint16_t          tune_samples_count;
+    uint32_t  tune_settle_time_sec;
+    uint32_t  tune_test_time_sec;     // runPid interval = testTimeSec / samples
+    uint16_t  tune_samples;
+    float     tune_input_span;
+    float     tune_output_span;
+    float     tune_output_start;
+    float     tune_output_step;
+    float     tune_temp_limit;
+    uint8_t   tune_debounce;
+    uint16_t  tune_samples_count;
 
     
-    float           tune_input;
-    float           tune_output;
-    float           tune_setpoint;
+    float     tune_input;
+    float     tune_output;
+    float     tune_setpoint;
 
 private:
     float pid_controller(float input, float bed_left_temp, float bed_right_temp);
