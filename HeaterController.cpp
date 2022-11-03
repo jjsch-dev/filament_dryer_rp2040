@@ -1,6 +1,6 @@
 #include "HeaterController.h"
 
-HeaterController::HeaterController(int pwm_freq) :
+HeaterController::HeaterController(int pwm_freq, int pwm_res) :
                   pid(&pid_input, &pid_output, &pid_setpoint, KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, DIRECT),
                   pid_const(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT),
                   tuner(&tune_input, &tune_output, tuner.ZN_PID, tuner.directIP, tuner.printOFF) {    
@@ -8,14 +8,15 @@ HeaterController::HeaterController(int pwm_freq) :
     pid_status = ST_DISABLED;
     tune_status = ST_DISABLED;    
     pwm_frequency = pwm_freq;
+    pwm_resolution = pwm_res;
     
     tune_settle_time_sec = 10;
     tune_test_time_sec = 500;     // runPid interval = testTimeSec / samples
     tune_samples = 500;
     tune_input_span = 70;
-    tune_output_span = 255;
+    tune_output_span = pwm_res; 
     tune_output_start = 0;
-    tune_output_step = 100;
+    tune_output_step = 100 * (pwm_res/255);
     tune_temp_limit = 60;
     tune_debounce = 1;
     tune_samples_count = 0;
@@ -36,12 +37,16 @@ bool ret_val;
     tuner.SetEmergencyStop(tune_temp_limit);
     
     pid.SetSampleTime(100);
-
+    pid.SetOutputLimits(0, pwm_resolution);
+    
     if ((ret_val = pid_const.begin())) {
         pid.SetTunings(pid_const.kp(), pid_const.ki(), pid_const.kd());  
     }
 
     analogWriteFreq(pwm_frequency);
+    analogWriteRange(pwm_resolution);
+    
+    pinMode(FAN_PIN, OUTPUT);
     
     fan_cooler(OUT_OFF);
     pwm(OUT_OFF);
@@ -65,19 +70,19 @@ float output = 0;
  
 void HeaterController::inc_setpoint(int count) {
     
-    int new_val = (int) pid_setpoint + count;
-    
-    if ((new_val >= 0) && (new_val <= 60)) {
-        pid_setpoint = new_val;
-    }    
+  int new_val = (int) pid_setpoint + count;
+  
+  if ((new_val >= 0) && (new_val <= 60)) {
+      pid_setpoint = new_val;
+  }    
 }
 
 int HeaterController::get_setpoint(void) {
-    return pid_setpoint;
+  return ((_mode == MODE_RUN_TUNE) ? tune_setpoint : pid_setpoint);
 }
 
 int HeaterController::get_mode(void) {
-    return _mode;
+  return _mode;
 }
 
 void HeaterController::set_mode(int new_mode) {
@@ -104,15 +109,15 @@ void HeaterController::set_mode(int new_mode) {
 }
     
 void HeaterController::pwm(int output) {
-    analogWrite(HOT_BED_LEFT_PIN, output);
-    analogWrite(HOT_BED_RIGHT_PIN, output);
+  analogWrite(HOT_BED_LEFT_PIN, output);
+  analogWrite(HOT_BED_RIGHT_PIN, output);
 }  
 
 /**
  * Use the Arduino PWM function to control the cooler fan in ON/OFF mode.
  */  
 void  HeaterController::fan_cooler(int output) {
-    analogWrite(FAN_PIN, output);
+  digitalWrite(FAN_PIN, (output == OUT_ON) ? HIGH : LOW );
 }
 
 float HeaterController::pid_controller(float input, float bed_left_temp, float bed_right_temp) {

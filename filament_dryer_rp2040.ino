@@ -24,14 +24,20 @@
 
 #define SAMPLE_TIMEOUT_100MS  100     // Refresh time for the sensor
 
-#define PWM_FREQUENCY         500     // Set a similar frequency of the Arduino Nano PWM (490Hz).
+/*
+ * NOTE: for now the resolution in 8 bits does not work with frequencies lower 
+ * than 1Khz with the porting for Arduino of Raspberry PI Pico. See issue:
+ * https://github.com/earlephilhower/arduino-pico/issues/955
+ */
+#define PWM_FREQUENCY         1000    // Set a similar frequency of the Arduino Nano PWM (490Hz).
+#define PWM_RESOLUTION        1024    // Set 8 bits for PWM resolution (0-255).
 
 int               set_time;
 uint8_t           menu_sel = 0;
 uint8_t           refresh_display = 10;
 
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS);
-HeaterController  heater(PWM_FREQUENCY);
+HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION);
 Adafruit_SSD1306  display(SCREEN_WIDTH, SCREEN_HEIGHT, &OLED_WIRE, OLED_RESET); 
 EncoderButton     *eb; 
 
@@ -105,7 +111,7 @@ void update_display_info() {
 }
 
 /**
- * A function to handle the 'clicked' event
+ * Process the click event.
  */
 void on_click(EncoderButton& eb) {
 
@@ -126,7 +132,7 @@ void on_click(EncoderButton& eb) {
 }
 
 /**
- * A function to handle the 'encoder' event
+ * Procces the 'encoder' event
  */
 void on_encoder(EncoderButton& eb) {
 int new_val;
@@ -213,25 +219,31 @@ void loop() {
   if (sensors.update()) {
     refresh_display++;
   }
-    
-  /*
-   * Shows status information, when not in setup mode
-   */
-  if ((menu_sel == 0) && (refresh_display >= 10)) {
-    refresh_display = 0;
-    update_display_info();
-  }
   
   float pwm_val = heater.update(sensors.box_celcius(), 
                                 sensors.bed_left_celcius(),
                                 sensors.bed_right_celcius());
 
-  /*
-   * Record the input, output, and setpoint values of the PID and tuner, 
-   * to use the Arduino Plotter to plot the system response.
-   * Note: The output is converted to a percentage.
-   */
-  if ((refresh_display == 0) && (heater.get_mode() != MODE_STOP)) { 
-    plot_pid(sensors.box_celcius(), (pwm_val/255.0f)*100, heater.get_setpoint()); 
+  // Once per second.
+  if (refresh_display >= 10) {
+    refresh_display = 0;
+
+   /*
+    * Shows status information, when not in setup mode.
+    */
+    if (menu_sel == 0) {  
+      update_display_info();
+    }
+    
+    /*
+     * Send the input output and setpoint values of the PID and tuner. 
+     * Use the Arduino Plotter to plot the system response.
+     * Note: The output is converted to percentage.
+     */
+    if (heater.get_mode() != MODE_STOP) { 
+      pwm_val /= PWM_RESOLUTION;
+      pwm_val *= 100;
+      plot_pid(sensors.box_celcius(), pwm_val, heater.get_setpoint()); 
+    }
   }
 }

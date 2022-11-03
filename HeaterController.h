@@ -35,7 +35,7 @@
 class HeaterController 
 {
 public:
-    HeaterController(int pwm_freq);
+    HeaterController(int pwm_freq, int pwm_res);
     ~HeaterController() {};
 
     bool begin();
@@ -56,6 +56,7 @@ private:
     int   pid_status;
     int   tune_status;
     int   pwm_frequency;
+    int   pwm_resolution;
     
     double pid_input;
     double pid_output;
