@@ -1,13 +1,17 @@
-/* 
- *  Controller of the filament dryer for Raspberry Pi Pico based in RP2040.
- */
- 
+/**
+ * 3D Filament dryer using a Raspberry Pi Pico (RP2040). 
+ * (C) Juan Schiavoni 2022
+ *
+ * Uses a bed heating to remove moisture from the air in order to 
+ * prevent filament degradation and improve 3D printing quality.
+ */ 
 #include <Wire.h>
 #include <EncoderButton.h>
 
 #include <Adafruit_SSD1306.h>
 #include "TempSensors.h"
 #include "HeaterController.h"
+#include "RunTimer.h"
 
 #define SCREEN_WIDTH          128     // OLED display width, in pixels
 #define SCREEN_HEIGHT         64      // OLED display height, in pixels
@@ -32,7 +36,8 @@
 #define PWM_FREQUENCY         1000    // Set a similar frequency of the Arduino Nano PWM (490Hz).
 #define PWM_RESOLUTION        1024    // Set 8 bits for PWM resolution (0-255).
 
-int               set_time;
+#define MAX_HOURS             48
+
 uint8_t           menu_sel = 0;
 uint8_t           refresh_display = 10;
 
@@ -40,6 +45,7 @@ TempSensors       sensors(SAMPLE_TIMEOUT_100MS);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION);
 Adafruit_SSD1306  display(SCREEN_WIDTH, SCREEN_HEIGHT, &OLED_WIRE, OLED_RESET); 
 EncoderButton     *eb; 
+RunTimer          timer(MAX_HOURS);
 
 /*
  * Shows the configuration menu.
@@ -57,7 +63,7 @@ void display_menu() {
   display.setCursor(15, 20);
   display.println("Time:");
   display.setCursor(80, 20);
-  display.println(set_time);
+  display.println(timer.get_time());
 
   display.setCursor(15, 40);
   display.println("Tune:");
@@ -77,37 +83,35 @@ void display_menu() {
  * Shows the runining information.
  */
 void update_display_info() {
-  display.clearDisplay();             // Clear the display everytime
-  display.setTextSize(2);             // Setting the text size and color         
-  display.setTextColor(WHITE);             
-  display.setCursor(0,0);             // Setting the cursor position
-
-  display.print(sensors.box_celcius(), 1);        
-  display.print("/");
-  display.print(heater.get_setpoint());
-  display.print(" ");
-  display.print((char)247);            
-  display.print("C");
-
-  display.setCursor(0,22);
-  display.print("Bed "); 
-  display.print(sensors.bed_left_celcius(), 0);
-  display.print("-");
-  display.print(sensors.bed_right_celcius(), 0);
-  display.print((char)247);
-
-  display.setCursor(0,42); 
-  if (heater.get_mode() == MODE_RUN_TUNE) {
-    display.print("Tune: ");
-
-    display.print(heater.tuning_percentage(), 1);
-  } else {
-    display.print("H: ");
-    display.print(sensors.box_humidity(), 1);  //                                          
-  }
-  display.print(" %");
+char buff[100];
   
-  display.display();                 // The display takes effect
+  display.clearDisplay();             
+  display.setTextSize(2);                
+  display.setTextColor(WHITE);             
+  
+  display.setCursor(22, 0);   
+  sprintf(buff, "%02.0f/%02d C", sensors.box_celcius(), heater.get_setpoint());
+  display.print(buff);
+
+  if (heater.get_mode() == MODE_RUN_TUNE) {
+    display.setCursor(10, 22);
+    sprintf(buff, "Bed %02.0f-%02.0f", sensors.bed_left_celcius(), sensors.bed_right_celcius());
+  } else {
+    display.setCursor(15, 22);
+    sprintf(buff, "%02d:%02d:%02d", timer.get_hours(), timer.get_minutes(), timer.get_seconds());
+  }
+  display.print(buff); 
+  
+  if (heater.get_mode() == MODE_RUN_TUNE) {
+    display.setCursor(10, 42);
+    sprintf(buff, "Tune %02d %%", heater.tuning_percentage());
+  } else {
+    display.setCursor(27, 42);
+    sprintf(buff, "%02.1f %%", sensors.box_humidity());
+  }
+  display.print(buff); 
+  
+  display.display();                 
 }
 
 /**
@@ -121,13 +125,17 @@ void on_click(EncoderButton& eb) {
     menu_sel = 0;
     
     refresh_display = 10;
-    if (heater.get_mode() != MODE_RUN_TUNE) {
-      if (heater.get_setpoint() > 0) {
+    if (heater.get_mode() == MODE_RUN_TUNE) {
+      timer.reset();  
+    } else {
+      if ((heater.get_setpoint() > 0) && (timer.get_time() > 0)) {
         heater.set_mode(MODE_RUN_PID);
+        timer.start();
       } else {
         heater.set_mode(MODE_STOP);
+        timer.reset();
       }
-    }
+   } 
   }
 }
 
@@ -140,12 +148,9 @@ int new_val;
   if (menu_sel > 0) {
     if (menu_sel == 1) {
       heater.inc_setpoint(eb.increment());
-    } else if( menu_sel == 2) {
-      new_val = set_time + eb.increment();
-      if ((new_val >= 0) && (new_val <= 48)) {
-        set_time = new_val;
-      } 
-    } else if( menu_sel == 3) {
+    } else if (menu_sel == 2) {
+      timer.inc_time(eb.increment());
+    } else if (menu_sel == 3) {
       heater.set_mode((eb.increment() > 0) ? MODE_RUN_TUNE : MODE_STOP);
     }
   
@@ -215,6 +220,12 @@ void loop() {
   
   eb->update();
 
+  // when the timer in hours expires, it stops the heater.
+  if (timer.update()) {
+    heater.set_mode(MODE_STOP);
+    timer.reset();
+  }
+  
   // Update sensor values every 100 mS.
   if (sensors.update()) {
     refresh_display++;
