@@ -1,6 +1,6 @@
 #include "HeaterController.h"
 
-HeaterController::HeaterController(int pwm_freq, int pwm_res) :
+HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed) :
                   pid(&pid_input, &pid_output, &pid_setpoint, KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, DIRECT),
                   pid_const(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT),
                   tuner(&tune_input, &tune_output, tuner.ZN_PID, tuner.directIP, tuner.printOFF) {    
@@ -9,6 +9,7 @@ HeaterController::HeaterController(int pwm_freq, int pwm_res) :
     tune_status = ST_DISABLED;    
     pwm_frequency = pwm_freq;
     pwm_resolution = pwm_res;
+    max_bed_temp = max_bed;
     
     tune_settle_time_sec = 10;
     tune_test_time_sec = 500;     // runPid interval = testTimeSec / samples
@@ -138,14 +139,14 @@ float HeaterController::pid_controller(float input, float bed_left_temp, float b
       fan_cooler(OUT_ON);
     break;
     case ST_RUN_PID:
-      if ( max(bed_left_temp, bed_right_temp) > BED_MAX_TEMP ) {
+      if ( max(bed_left_temp, bed_right_temp) > max_bed_temp ) {
         pid.SetMode(MANUAL);  
         pid_output = 0;
         pid_status = ST_WAIT_BED_TEMP_DROP;
       }
     break;
     case ST_WAIT_BED_TEMP_DROP: 
-      if ( max(bed_left_temp, bed_right_temp) < (BED_MAX_TEMP - 5) ) {
+      if ( max(bed_left_temp, bed_right_temp) < (max_bed_temp - 5) ) {
         pid_status = ST_RUN_PID;
         pid.SetMode(AUTOMATIC);  
       }
@@ -168,7 +169,7 @@ float HeaterController::tune_controller(float input) {
     pid_output = 0;   
     fan_cooler(OUT_ON); 
     pid_setpoint = 0;
-    //set_time = 0;
+
     tuner.Reset();
     tune_samples_count = 0;
     tune_status = ST_RUN_PID;

@@ -37,12 +37,13 @@
 #define PWM_RESOLUTION        1024    // Set 8 bits for PWM resolution (0-255).
 
 #define MAX_HOURS             48
+#define BED_MAX_TEMP          80.00
 
 uint8_t           menu_sel = 0;
 uint8_t           refresh_display = 10;
 
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS);
-HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION);
+HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP);
 Adafruit_SSD1306  display(SCREEN_WIDTH, SCREEN_HEIGHT, &OLED_WIRE, OLED_RESET); 
 EncoderButton     *eb; 
 RunTimer          timer(MAX_HOURS);
@@ -158,32 +159,30 @@ int new_val;
   }
 }
 
-void plot_pid(float input, float output, float setpoint) {
+void plot_pid(float input, float output, float setpoint, float bed_temp, float bed_max) {
   if (Serial) {  
     Serial.print(F("Setpoint:"));  Serial.print(setpoint);  Serial.print(F(", "));
     Serial.print(F("Input:"));     Serial.print(input);     Serial.print(F(", "));
-    Serial.print(F("Output:"));    Serial.print(output);    Serial.print(F(","));
+    Serial.print(F("Output:"));    Serial.print(output);    Serial.print(F(", "));
+    Serial.print(F("Bed:"));       Serial.print(bed_temp);  Serial.print(F(", "));
+    Serial.print(F("BedMax:"));    Serial.print(bed_max);   
     Serial.println();
   }
 }
 
 /*
- * Show introduction message when USB serial port is connected.
+ * Show one time the introduction message when USB serial port is connected.
  */
 void show_intro_msg(void) {
-static bool do_it = false;
+static bool one_time = true;
   
-  if (Serial) {
-    if (!do_it) {
-      Serial.println("Filament dryer controller.");
-      Serial.print("Kp: "); Serial.print(heater.pid_const.kp());
-      Serial.print(" Ki: "); Serial.print(heater.pid_const.ki());
-      Serial.print(" Kd: "); Serial.println(heater.pid_const.kd());
-      do_it = true;
-    }
-  } else {
-    do_it = false;
-  }
+  if (Serial && one_time) {
+    Serial.println("Filament dryer controller.");
+    Serial.print("Kp: "); Serial.print(heater.pid_const.kp());
+    Serial.print(" Ki: "); Serial.print(heater.pid_const.ki());
+    Serial.print(" Kd: "); Serial.println(heater.pid_const.kd());
+    one_time = false;
+  } 
 }
   
 /**
@@ -254,7 +253,9 @@ void loop() {
     if (heater.get_mode() != MODE_STOP) { 
       pwm_val /= PWM_RESOLUTION;
       pwm_val *= 100;
-      plot_pid(sensors.box_celcius(), pwm_val, heater.get_setpoint()); 
+      plot_pid(sensors.box_celcius(), pwm_val, heater.get_setpoint(),
+               max(sensors.bed_left_celcius(), sensors.bed_right_celcius()),
+               BED_MAX_TEMP); 
     }
   }
 }

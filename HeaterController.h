@@ -30,12 +30,10 @@
 #define OUT_ON                  255     // MAX PWM duty cicle  
 #define OUT_OFF                 0       // MIN PWM duty cicle
 
-#define BED_MAX_TEMP            80.00
-
 class HeaterController 
 {
 public:
-    HeaterController(int pwm_freq, int pwm_res);
+    HeaterController(int pwm_freq, int pwm_res, float max_bed_temp);
     ~HeaterController() {};
 
     bool begin();
@@ -57,6 +55,7 @@ private:
     int   tune_status;
     int   pwm_frequency;
     int   pwm_resolution;
+    float max_bed_temp;
     
     double pid_input;
     double pid_output;
