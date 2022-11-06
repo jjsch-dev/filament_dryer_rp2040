@@ -1,6 +1,10 @@
+/**
+ * Controls the beds that are responsible for heating the filament box.  
+ * (C) Juan Schiavoni 2022
+ *
+ * Encapsulates the PID and Tunner library.
+ */ 
 #pragma once
-#ifndef HEATER_CONTROLLER_H_
-#define HEATER_CONTROLLER_H_
 
 #include "Arduino.h"
 
@@ -33,57 +37,54 @@
 class HeaterController 
 {
 public:
-    HeaterController(int pwm_freq, int pwm_res, float max_bed_temp);
-    ~HeaterController() {};
+  HeaterController(int pwm_freq, int pwm_res, float max_bed_temp);
+  ~HeaterController() {};
 
-    bool begin();
-    float update(float box_temp, float bed_left_temp, float bed_right_temp);
-    void inc_setpoint(int count);
-    int get_setpoint(void);
-    int get_mode(void);
-    void set_mode(int mode);
-    int tuning_percentage(void );
+  bool begin();
+  float update(float box_temp, float bed_left_temp, float bed_right_temp);
+  void inc_setpoint(int count);
+  int get_setpoint(void);
+  int get_mode(void);
+  void set_mode(int mode);
+  int tuning_percentage(void );
 
-    PIDConst    pid_const;
+  PIDConst    pid_const;
     
 private:
-    PID         pid;  
-    sTune       tuner; 
-    
-    int   _mode;
-    int   pid_status;
-    int   tune_status;
-    int   pwm_frequency;
-    int   pwm_resolution;
-    float max_bed_temp;
-    
-    double pid_input;
-    double pid_output;
-    double pid_setpoint;
+  PID   pid;  
+  sTune tuner; 
+  
+  int   _mode;
+  int   pid_status;
+  int   tune_status;
+  int   pwm_frequency;
+  int   pwm_resolution;
+  float max_bed_temp;
+  
+  double pid_input;
+  double pid_output;
+  double pid_setpoint;
 
 private:
+  uint32_t  tune_settle_time_sec;
+  uint32_t  tune_test_time_sec;     // runPid interval = testTimeSec / samples
+  uint16_t  tune_samples;
+  float     tune_input_span;
+  float     tune_output_span;
+  float     tune_output_start;
+  float     tune_output_step;
+  float     tune_temp_limit;
+  uint8_t   tune_debounce;
+  uint16_t  tune_samples_count;
 
-    uint32_t  tune_settle_time_sec;
-    uint32_t  tune_test_time_sec;     // runPid interval = testTimeSec / samples
-    uint16_t  tune_samples;
-    float     tune_input_span;
-    float     tune_output_span;
-    float     tune_output_start;
-    float     tune_output_step;
-    float     tune_temp_limit;
-    uint8_t   tune_debounce;
-    uint16_t  tune_samples_count;
-
-    
-    float     tune_input;
-    float     tune_output;
-    float     tune_setpoint;
+  
+  float     tune_input;
+  float     tune_output;
+  float     tune_setpoint;
 
 private:
-    float pid_controller(float input, float bed_left_temp, float bed_right_temp);
-    float tune_controller(float input);
-    void  pwm(int output);
-    void  fan_cooler(int output);
+  float pid_controller(float input, float bed_left_temp, float bed_right_temp);
+  float tune_controller(float input);
+  void  pwm(int output);
+  void  fan_cooler(int output);
 };
-
-#endif

@@ -1,3 +1,9 @@
+/**
+ * Controls the operation timer.  
+ * (C) Juan Schiavoni 2022
+ *
+ * Use the time.h library to parse the elapsed seconds.
+ */ 
 #include "RunTimer.h"
 
 

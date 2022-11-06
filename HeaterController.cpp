@@ -1,58 +1,64 @@
+/**
+ * Controls the beds that are responsible for heating the filament box.  
+ * (C) Juan Schiavoni 2022
+ *
+ * Encapsulates the PID and Tunner library.
+ */ 
 #include "HeaterController.h"
 
 HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed) :
                   pid(&pid_input, &pid_output, &pid_setpoint, KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, DIRECT),
                   pid_const(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT),
                   tuner(&tune_input, &tune_output, tuner.ZN_PID, tuner.directIP, tuner.printOFF) {    
-    _mode = MODE_STOP;
-    pid_status = ST_DISABLED;
-    tune_status = ST_DISABLED;    
-    pwm_frequency = pwm_freq;
-    pwm_resolution = pwm_res;
-    max_bed_temp = max_bed;
-    
-    tune_settle_time_sec = 10;
-    tune_test_time_sec = 500;     // runPid interval = testTimeSec / samples
-    tune_samples = 500;
-    tune_input_span = 70;
-    tune_output_span = pwm_res; 
-    tune_output_start = 0;
-    tune_output_step = 100 * (pwm_res/255);
-    tune_temp_limit = 60;
-    tune_debounce = 1;
-    tune_samples_count = 0;
-
-    pid_setpoint = 0; 
-    pid_input = 0; 
-    pid_output = 0;
-    tune_input = 0;
-    tune_output = 0;
-    tune_setpoint = 50;
+  _mode = MODE_STOP;
+  pid_status = ST_DISABLED;
+  tune_status = ST_DISABLED;    
+  pwm_frequency = pwm_freq;
+  pwm_resolution = pwm_res;
+  max_bed_temp = max_bed;
+  
+  tune_settle_time_sec = 10;
+  tune_test_time_sec = 500;     // runPid interval = testTimeSec / samples
+  tune_samples = 500;
+  tune_input_span = 70;
+  tune_output_span = pwm_res; 
+  tune_output_start = 0;
+  tune_output_step = 100 * (pwm_res/255);
+  tune_temp_limit = 60;
+  tune_debounce = 1;
+  tune_samples_count = 0;
+  
+  pid_setpoint = 0; 
+  pid_input = 0; 
+  pid_output = 0;
+  tune_input = 0;
+  tune_output = 0;
+  tune_setpoint = 50;
 }
 
 bool HeaterController::begin() {
 bool ret_val;
 
-    tuner.Configure(tune_input_span, tune_output_span, tune_output_start, 
-                    tune_output_step, tune_test_time_sec, tune_settle_time_sec, tune_samples);
-    tuner.SetEmergencyStop(tune_temp_limit);
-    
-    pid.SetSampleTime(100);
-    pid.SetOutputLimits(0, pwm_resolution);
-    
-    if ((ret_val = pid_const.begin())) {
-        pid.SetTunings(pid_const.kp(), pid_const.ki(), pid_const.kd());  
-    }
-
-    analogWriteFreq(pwm_frequency);
-    analogWriteRange(pwm_resolution);
-    
-    pinMode(FAN_PIN, OUTPUT);
-    
-    fan_cooler(OUT_OFF);
-    pwm(OUT_OFF);
-
-    return ret_val;
+  tuner.Configure(tune_input_span, tune_output_span, tune_output_start, 
+                  tune_output_step, tune_test_time_sec, tune_settle_time_sec, tune_samples);
+  tuner.SetEmergencyStop(tune_temp_limit);
+  
+  pid.SetSampleTime(100);
+  pid.SetOutputLimits(0, pwm_resolution);
+  
+  if ((ret_val = pid_const.begin())) {
+    pid.SetTunings(pid_const.kp(), pid_const.ki(), pid_const.kd());  
+  }
+  
+  analogWriteFreq(pwm_frequency);
+  analogWriteRange(pwm_resolution);
+  
+  pinMode(FAN_PIN, OUTPUT);
+  
+  fan_cooler(OUT_OFF);
+  pwm(OUT_OFF);
+  
+  return ret_val;
 }
 
 float HeaterController::update(float box_temp, float bed_left_temp, float bed_right_temp) {
@@ -63,14 +69,13 @@ float output = 0;
   } else if (_mode == MODE_RUN_TUNE){
     output = tune_controller(box_temp);
   }
-
+  
   pwm(output);
    
   return output;
 }
  
 void HeaterController::inc_setpoint(int count) {
-    
   int new_val = (int) pid_setpoint + count;
   
   if ((new_val >= 0) && (new_val <= 60)) {

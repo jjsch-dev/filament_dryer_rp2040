@@ -1,6 +1,10 @@
+/**
+ * Controls the operation timer.  
+ * (C) Juan Schiavoni 2022
+ *
+ * Use the time.h library to parse the elapsed seconds.
+ */ 
 #pragma once
-#ifndef RUN_TIMER_H_
-#define RUN_TIMER_H_
 
 #include <time.h>
 #include "Arduino.h"
@@ -27,5 +31,3 @@ private:
   unsigned long   max_inc;
   struct tm*      tm;
 };
-
-#endif

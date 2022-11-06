@@ -1,6 +1,10 @@
+/**
+ * Stores PID constants in EEPROM.  
+ * (C) Juan Schiavoni 2022
+ *
+ * As the RP2040 does not have EEPROM, picoarduino simulates it with a flash page.
+ */ 
 #pragma once
-#ifndef PID_CONSTATS_H_
-#define PID_CONSTATS_H_
 
 #define CONST_INITED        0x434f4e13 //53        // ASCII = CONS
 
@@ -11,28 +15,26 @@
 
 class PIDConst  
 {
-  public:
-    PIDConst(float default_kp, float default_ki, float default_kd);
-    ~PIDConst() {};
-
-    bool begin();
-    float kp(void);
-    float ki(void);
-    float kd(void);
-
-    float read_kp(void);
-    float read_ki(void);
-    float read_kd(void);
-    
-    void store(float kp, float ki, float kd);
-  private:
-    int read_magic(void);
-    void write_magic(int val);
-    
-    float _kp;  
-    float _ki;
-    float _kd; 
-    int magic_number;
+public:
+  PIDConst(float default_kp, float default_ki, float default_kd);
+  ~PIDConst() {};
+  
+  bool begin();
+  float kp(void);
+  float ki(void);
+  float kd(void);
+  
+  float read_kp(void);
+  float read_ki(void);
+  float read_kd(void);
+  
+  void store(float kp, float ki, float kd);
+private:
+  int read_magic(void);
+  void write_magic(int val);
+  
+  float _kp;  
+  float _ki;
+  float _kd; 
+  int magic_number;
 };
-
-#endif
