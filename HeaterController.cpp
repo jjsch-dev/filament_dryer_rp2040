@@ -194,7 +194,7 @@ float HeaterController::tune_controller(float input) {
         pid_const.store(kp, ki, kd);
         
         pid.SetTunings(kp, ki, kd); // update PID with the new tunings
-        tuner.printTunings();
+        
         set_mode(MODE_STOP); 
       break;
     } 

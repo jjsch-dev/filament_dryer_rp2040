@@ -279,7 +279,7 @@ void loop() {
     refresh_display++;
   }
 
-  // Displays the firmware version screen for 3 seconds or until the encoder is pressed.
+  // Displays the firmware version screen for a seconds or until the encoder is pressed.
   if (!display_version()) {
     float pwm_val = heater.update(sensors.box_celcius(), 
                                   sensors.bed_left_celcius(),
