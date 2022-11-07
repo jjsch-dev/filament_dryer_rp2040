@@ -162,13 +162,20 @@ int new_val;
   }
 }
 
-void plot_pid(float input, float output, float setpoint, float bed_temp, float bed_max) {
-  if (Serial) {  
-    Serial.print(F("Setpoint:"));  Serial.print(setpoint);  Serial.print(F(", "));
-    Serial.print(F("Input:"));     Serial.print(input);     Serial.print(F(", "));
-    Serial.print(F("Output:"));    Serial.print(output);    Serial.print(F(", "));
-    Serial.print(F("Bed:"));       Serial.print(bed_temp);  Serial.print(F(", "));
-    Serial.print(F("BedMax:"));    Serial.print(bed_max);   
+void plot_pid(float pwm_val) {
+  if (Serial) {
+    float  bed_temp = max(sensors.bed_left_celcius(), sensors.bed_right_celcius());
+    
+    pwm_val /= PWM_RESOLUTION;
+    pwm_val *= 100;
+        
+    Serial.print(F("Setpoint:"));     Serial.print(heater.get_setpoint());  Serial.print(F(", "));
+    Serial.print(F("BoxTemp:"));      Serial.print(sensors.box_celcius());  Serial.print(F(", "));
+    Serial.print(F("BoxHumidity:"));  Serial.print(sensors.box_humidity()); Serial.print(F(", "));
+    Serial.print(F("PWM:"));          Serial.print(pwm_val);                Serial.print(F(", "));
+    Serial.print(F("BedTemp:"));      Serial.print(bed_temp);               Serial.print(F(", "));
+    Serial.print(F("BedMax:"));       Serial.print(BED_MAX_TEMP);
+               
     Serial.println();
   }
 }
@@ -254,11 +261,7 @@ void loop() {
      * Note: The output is converted to percentage.
      */
     if (heater.get_mode() != MODE_STOP) { 
-      pwm_val /= PWM_RESOLUTION;
-      pwm_val *= 100;
-      plot_pid(sensors.box_celcius(), pwm_val, heater.get_setpoint(),
-               max(sensors.bed_left_celcius(), sensors.bed_right_celcius()),
-               BED_MAX_TEMP); 
+      plot_pid(pwm_val); 
     }
   }
 }
