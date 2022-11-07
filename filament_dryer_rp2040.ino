@@ -13,6 +13,8 @@
 #include "HeaterController.h"
 #include "RunTimer.h"
 
+#define FIRMWARE_VERSION      "0.0.9" // Version actual del firmware.
+
 #define SCREEN_WIDTH          128     // OLED display width, in pixels
 #define SCREEN_HEIGHT         64      // OLED display height, in pixels
 #define OLED_RESET            -1      // Reset pin # (or -1 if sharing Arduino reset pin)
@@ -42,14 +44,46 @@
 #define MAX_HOURS             48
 #define BED_MAX_TEMP          80.00
 
+#define SPLASH_VERSION_TIME   5000    // Version screen display time in mS.
+
 uint8_t           menu_sel = 0;
 uint8_t           refresh_display = 10;
+
+unsigned long     splash_timer;
+bool              encoder_clicked = false;
 
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP);
 Adafruit_SSD1306  display(SCREEN_WIDTH, SCREEN_HEIGHT, &OLED_WIRE, OLED_RESET); 
 EncoderButton     *eb; 
 RunTimer          timer(MAX_HOURS);
+
+/*
+ * Displays the firmware version screen for 3 seconds or until the encoder is pressed.
+ */
+bool display_version() {
+bool ret_val = !encoder_clicked;
+
+  if (ret_val) {
+    ret_val = (splash_timer + SPLASH_VERSION_TIME > millis());
+    
+    if (ret_val) { 
+      display.clearDisplay();             
+      display.setTextSize(2);                
+      display.setTextColor(WHITE);             
+    
+      display.setCursor(15, 0);
+      display.println("Filament");
+      display.setCursor(35, 20);
+      display.println("Dryer");
+      display.setCursor(35, 40);   
+      display.print(FIRMWARE_VERSION);
+      display.display();
+    }
+  }
+
+  return ret_val;
+}
 
 /*
  * Shows the configuration menu.
@@ -139,8 +173,10 @@ void on_click(EncoderButton& eb) {
         heater.set_mode(MODE_STOP);
         timer.reset();
       }
-   } 
+    } 
   }
+
+  encoder_clicked = true;
 }
 
 /**
@@ -187,7 +223,8 @@ void show_intro_msg(void) {
 static bool one_time = true;
   
   if (Serial && one_time) {
-    Serial.println("Filament dryer controller.");
+    Serial.print("Filament dryer controller - version: ");
+    Serial.println(FIRMWARE_VERSION);
     Serial.print("Kp: "); Serial.print(heater.pid_const.kp());
     Serial.print(" Ki: "); Serial.print(heater.pid_const.ki());
     Serial.print(" Kd: "); Serial.println(heater.pid_const.kd());
@@ -222,6 +259,8 @@ void setup() {
   sensors.begin();
   
   heater.begin();
+
+  splash_timer = millis();
 }
 
 void loop() {
@@ -239,29 +278,32 @@ void loop() {
   if (sensors.update()) {
     refresh_display++;
   }
+
+  // Displays the firmware version screen for 3 seconds or until the encoder is pressed.
+  if (!display_version()) {
+    float pwm_val = heater.update(sensors.box_celcius(), 
+                                  sensors.bed_left_celcius(),
+                                  sensors.bed_right_celcius());
   
-  float pwm_val = heater.update(sensors.box_celcius(), 
-                                sensors.bed_left_celcius(),
-                                sensors.bed_right_celcius());
-
-  // Once per second.
-  if (refresh_display >= 10) {
-    refresh_display = 0;
-
-   /*
-    * Shows status information, when not in setup mode.
-    */
-    if (menu_sel == 0) {  
-      update_display_info();
-    }
-    
-    /*
-     * Send the input output and setpoint values of the PID and tuner. 
-     * Use the Arduino Plotter to plot the system response.
-     * Note: The output is converted to percentage.
-     */
-    if (heater.get_mode() != MODE_STOP) { 
-      plot_pid(pwm_val); 
+    // Once per second.
+    if (refresh_display >= 10) {
+      refresh_display = 0;
+  
+     /*
+      * Shows status information, when not in setup mode.
+      */
+      if (menu_sel == 0) {  
+        update_display_info();
+      }
+      
+      /*
+       * Send the input output and setpoint values of the PID and tuner. 
+       * Use the Arduino Plotter to plot the system response.
+       * Note: The output is converted to percentage.
+       */
+      if (heater.get_mode() != MODE_STOP) { 
+        plot_pid(pwm_val); 
+      }
     }
   }
 }
