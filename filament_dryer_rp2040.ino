@@ -29,12 +29,15 @@
 #define SAMPLE_TIMEOUT_100MS  100     // Refresh time for the sensor
 
 /*
- * NOTE: for now the resolution in 8 bits does not work with frequencies lower 
- * than 1Khz with the porting for Arduino of Raspberry PI Pico. See issue:
+ * NOTE: with arduinopico version 2.6.2 the resolution in 8 bits does not work 
+ * when two pins are used. See issue:
  * https://github.com/earlephilhower/arduino-pico/issues/955
+ * 
+ * It is fixed with push #926 and can be used from the ppp branch using git.
+ * https://github.com/earlephilhower/arduino-pico/pull/962
  */
-#define PWM_FREQUENCY         1000    // Set a similar frequency of the Arduino Nano PWM (490Hz).
-#define PWM_RESOLUTION        1024    // Set 8 bits for PWM resolution (0-255).
+#define PWM_FREQUENCY         500     // Set a similar frequency of the Arduino Nano PWM (490Hz).
+#define PWM_RESOLUTION        255     // Set 8 bits for PWM resolution (0-255).
 
 #define MAX_HOURS             48
 #define BED_MAX_TEMP          80.00
