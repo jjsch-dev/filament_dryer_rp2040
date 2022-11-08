@@ -7,7 +7,7 @@
 #include "HeaterController.h"
 
 HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed) :
-                  pid(&pid_input, &pid_output, &pid_setpoint), //KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, DIRECT),
+                  pid(&pid_input, &pid_output, &pid_setpoint), 
                   pid_const(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT),
                   tuner(&tune_input, &tune_output, tuner.ZN_PID, tuner.directIP, tuner.printOFF) {    
   _mode = MODE_STOP;
@@ -43,10 +43,9 @@ bool ret_val;
                   tune_output_step, tune_test_time_sec, tune_settle_time_sec, tune_samples);
   tuner.SetEmergencyStop(tune_temp_limit);
   
-  //pid.SetSampleTime(100);
-  pid.SetSampleTimeUs(100000); // 100 mS en uS
+  pid.SetSampleTimeUs(200000); // 200 mS en uS
   pid.SetOutputLimits(0, pwm_resolution);
-  //pid.SetMode(myPID.Control::automatic); // the PID is turned on
+
   pid.SetProportionalMode(pid.pMode::pOnMeas);
   pid.SetAntiWindupMode(pid.iAwMode::iAwClamp);
   
@@ -81,9 +80,14 @@ float output = 0;
  
 void HeaterController::inc_setpoint(int count) {
   int new_val = (int) pid_setpoint + count;
-  
-  if ((new_val >= 0) && (new_val <= 60)) {
-      pid_setpoint = new_val;
+
+  // The temperature can be regulated between 40 and 60 degrees. 0 = disabled
+  if ((pid_setpoint == 0) && (new_val < MIN_SETPOINT) && (count > 0)) {
+    pid_setpoint = MIN_SETPOINT;    
+  } else if(new_val < MIN_SETPOINT) {
+    pid_setpoint = 0; 
+  }else if (new_val <= MAX_SETPOINT) {
+    pid_setpoint = new_val;
   }    
 }
 
@@ -135,24 +139,18 @@ float HeaterController::pid_controller(float box_temp, float bed_temp) {
 
   switch (pid_status) {
     case ST_DISABLED:
-      //pid.SetMode(MANUAL);
       pid.SetMode(pid.Control::manual);
       fan_cooler(OUT_OFF);
     break;
     case ST_INITIALICE:
-      //pid.SetMode(MANUAL);
       pid.SetMode(pid.Control::manual);
       pid_output = 0;
-    
-      pid_status = ST_RUN_PID; 
-      
-      //pid.SetMode(AUTOMATIC); 
       pid.SetMode(pid.Control::automatic);
       fan_cooler(OUT_ON);
+      pid_status = ST_RUN_PID; 
     break;
     case ST_RUN_PID:
       if (bed_temp > max_bed_temp) {
-        //pid.SetMode(MANUAL);
         pid.SetMode(pid.Control::manual);
         pid_status = ST_WAIT_BED_TEMP_DROP;
       }
@@ -160,8 +158,6 @@ float HeaterController::pid_controller(float box_temp, float bed_temp) {
     case ST_WAIT_BED_TEMP_DROP: 
       if (bed_temp < (max_bed_temp - 5)) {
         pid_status = ST_RUN_PID;
-        //pid_output = 0; // tune_output_step;
-        //pid.SetMode(AUTOMATIC);  
         pid.SetMode(pid.Control::automatic);
       }
     break;
@@ -179,7 +175,6 @@ float HeaterController::tune_controller(float input) {
   
   if (tune_status == ST_INITIALICE) {
     pid_status =  ST_DISABLED;
-    //pid.SetMode(MANUAL);
     pid.SetMode(pid.Control::manual);
     pid_output = 0;   
     fan_cooler(OUT_ON); 

@@ -39,7 +39,7 @@
  * https://github.com/earlephilhower/arduino-pico/pull/962
  */
 #define PWM_FREQUENCY         500       // Set a similar frequency of the Arduino Nano PWM (490Hz).
-#define PWM_RESOLUTION        1024 //255     // Set 8 bits for PWM resolution (0-255).
+#define PWM_RESOLUTION        255       // Set 8 bits for PWM resolution (0-255).
 
 #define MAX_HOURS             48
 #define BED_MAX_TEMP          80.00

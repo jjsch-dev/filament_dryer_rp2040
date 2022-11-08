@@ -8,7 +8,6 @@
 
 #include "Arduino.h"
 
-//#include <PID_v1.h>
 #include <QuickPID.h>
 #include <sTune.h>
 
@@ -35,6 +34,9 @@
 #define OUT_ON                  255     // MAX PWM duty cicle  
 #define OUT_OFF                 0       // MIN PWM duty cicle
 
+#define MIN_SETPOINT            40      // Minimum Box temperature. 
+#define MAX_SETPOINT            60      // Maximun Box temperature.
+
 class HeaterController 
 {
 public:
@@ -53,7 +55,6 @@ public:
     
 private:
   QuickPID  pid;
-  //PID   pid;  
   sTune tuner; 
   
   int   _mode;
@@ -63,9 +64,6 @@ private:
   int   pwm_resolution;
   float max_bed_temp;
   
-  //double pid_input;
-  //double pid_output;
-  //double pid_setpoint;
   float pid_input;
   float pid_output;
   float pid_setpoint;
