@@ -212,7 +212,7 @@ static uint8_t plot_delay = 0;
   if (Serial) {
     if (heater.get_mode() == MODE_STOP) { 
       plot_delay = 0; 
-    } else if (plot_delay++ == 0) {
+    } else if ((plot_delay++ == 0) || (heater.get_mode() == MODE_RUN_TUNE)) {
       pwm_val /= PWM_RESOLUTION;
       pwm_val *= 100;
           

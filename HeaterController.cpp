@@ -23,7 +23,7 @@ HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed) :
   tune_input_span = 60;
   tune_output_span = pwm_res; 
   tune_output_start = 0;
-  tune_output_step = (pwm_res * 25) / 100;  // Set initial step in % depending on pwm resolution;
+  tune_output_step = (pwm_res * 40) / 100;  // Set initial step in % depending on pwm resolution;
   tune_temp_limit = 60;
   tune_debounce = 1;
   tune_samples_count = 0;
