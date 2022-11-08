@@ -8,7 +8,8 @@
 
 #include "Arduino.h"
 
-#include <PID_v1.h>
+//#include <PID_v1.h>
+#include <QuickPID.h>
 #include <sTune.h>
 
 #include "PIDConst.h"
@@ -51,7 +52,8 @@ public:
   PIDConst    pid_const;
     
 private:
-  PID   pid;  
+  QuickPID  pid;
+  //PID   pid;  
   sTune tuner; 
   
   int   _mode;
@@ -61,9 +63,12 @@ private:
   int   pwm_resolution;
   float max_bed_temp;
   
-  double pid_input;
-  double pid_output;
-  double pid_setpoint;
+  //double pid_input;
+  //double pid_output;
+  //double pid_setpoint;
+  float pid_input;
+  float pid_output;
+  float pid_setpoint;
 
 private:
   uint32_t  tune_settle_time_sec;

@@ -13,11 +13,11 @@
 #include "HeaterController.h"
 #include "RunTimer.h"
 
-#define FIRMWARE_VERSION      "0.0.9" // Version actual del firmware.
+#define FIRMWARE_VERSION      "0.0.10"  // Version actual del firmware.
 
-#define SCREEN_WIDTH          128     // OLED display width, in pixels
-#define SCREEN_HEIGHT         64      // OLED display height, in pixels
-#define OLED_RESET            -1      // Reset pin # (or -1 if sharing Arduino reset pin)
+#define SCREEN_WIDTH          128       // OLED display width, in pixels
+#define SCREEN_HEIGHT         64        // OLED display height, in pixels
+#define OLED_RESET            -1        // Reset pin # (or -1 if sharing Arduino reset pin)
 #define OLED_ADDR             0x3C
 
 #define OLED_WIRE             Wire1
@@ -28,7 +28,7 @@
 #define ENCONDER_DT_PIN       7
 #define ENCONDER_BUTTON_PIN   8
 
-#define SAMPLE_TIMEOUT_100MS  100     // Refresh time for the sensor
+#define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 
 /*
  * NOTE: with arduinopico version 2.6.2 the resolution in 8 bits does not work 
@@ -38,13 +38,13 @@
  * It is fixed with push #926 and can be used from the ppp branch using git.
  * https://github.com/earlephilhower/arduino-pico/pull/962
  */
-#define PWM_FREQUENCY         500     // Set a similar frequency of the Arduino Nano PWM (490Hz).
-#define PWM_RESOLUTION        255     // Set 8 bits for PWM resolution (0-255).
+#define PWM_FREQUENCY         500       // Set a similar frequency of the Arduino Nano PWM (490Hz).
+#define PWM_RESOLUTION        1024 //255     // Set 8 bits for PWM resolution (0-255).
 
 #define MAX_HOURS             48
 #define BED_MAX_TEMP          80.00
 
-#define SPLASH_VERSION_TIME   5000    // Version screen display time in mS.
+#define SPLASH_VERSION_TIME   5000      // Version screen display time in mS.
 
 uint8_t           menu_sel = 0;
 uint8_t           refresh_display = 10;
@@ -79,6 +79,8 @@ bool ret_val = !encoder_clicked;
       display.setCursor(35, 40);   
       display.print(FIRMWARE_VERSION);
       display.display();
+    } else {
+      encoder_clicked = true;  
     }
   }
 

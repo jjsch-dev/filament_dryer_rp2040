@@ -7,7 +7,7 @@
 #include "HeaterController.h"
 
 HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed) :
-                  pid(&pid_input, &pid_output, &pid_setpoint, KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, DIRECT),
+                  pid(&pid_input, &pid_output, &pid_setpoint), //KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, DIRECT),
                   pid_const(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT),
                   tuner(&tune_input, &tune_output, tuner.ZN_PID, tuner.directIP, tuner.printOFF) {    
   _mode = MODE_STOP;
@@ -20,10 +20,10 @@ HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed) :
   tune_settle_time_sec = 10;
   tune_test_time_sec = 500;     // runPid interval = testTimeSec / samples
   tune_samples = 500;
-  tune_input_span = 70;
+  tune_input_span = 60;
   tune_output_span = pwm_res; 
   tune_output_start = 0;
-  tune_output_step = (pwm_res * 40) / 100; //100 * (pwm_res/255);
+  tune_output_step = (pwm_res * 25) / 100;  // Set initial step in % depending on pwm resolution;
   tune_temp_limit = 60;
   tune_debounce = 1;
   tune_samples_count = 0;
@@ -43,12 +43,16 @@ bool ret_val;
                   tune_output_step, tune_test_time_sec, tune_settle_time_sec, tune_samples);
   tuner.SetEmergencyStop(tune_temp_limit);
   
-  pid.SetSampleTime(100);
+  //pid.SetSampleTime(100);
+  pid.SetSampleTimeUs(100000); // 100 mS en uS
   pid.SetOutputLimits(0, pwm_resolution);
+  //pid.SetMode(myPID.Control::automatic); // the PID is turned on
+  pid.SetProportionalMode(pid.pMode::pOnMeas);
+  pid.SetAntiWindupMode(pid.iAwMode::iAwClamp);
   
-  if ((ret_val = pid_const.begin())) {
-    pid.SetTunings(pid_const.kp(), pid_const.ki(), pid_const.kd());  
-  }
+  ret_val = pid_const.begin(); 
+  
+  pid.SetTunings(pid_const.kp(), pid_const.ki(), pid_const.kd());  
   
   analogWriteFreq(pwm_frequency);
   analogWriteRange(pwm_resolution);
@@ -131,29 +135,34 @@ float HeaterController::pid_controller(float input, float bed_left_temp, float b
 
   switch (pid_status) {
     case ST_DISABLED:
-      pid.SetMode(MANUAL);
+      //pid.SetMode(MANUAL);
+      pid.SetMode(pid.Control::manual);
       fan_cooler(OUT_OFF);
     break;
     case ST_INITIALICE:
-      pid.SetMode(MANUAL);
+      //pid.SetMode(MANUAL);
+      pid.SetMode(pid.Control::manual);
       pid_output = 0;
     
       pid_status = ST_RUN_PID; 
       
-      pid.SetMode(AUTOMATIC); 
+      //pid.SetMode(AUTOMATIC); 
+      pid.SetMode(pid.Control::automatic);
       fan_cooler(OUT_ON);
     break;
     case ST_RUN_PID:
       if ( max(bed_left_temp, bed_right_temp) > max_bed_temp ) {
-        pid.SetMode(MANUAL);  
-        pid_output = 0;
+        //pid.SetMode(MANUAL);
+        pid.SetMode(pid.Control::manual);
         pid_status = ST_WAIT_BED_TEMP_DROP;
       }
     break;
     case ST_WAIT_BED_TEMP_DROP: 
       if ( max(bed_left_temp, bed_right_temp) < (max_bed_temp - 5) ) {
         pid_status = ST_RUN_PID;
-        pid.SetMode(AUTOMATIC);  
+        //pid_output = 0; // tune_output_step;
+        //pid.SetMode(AUTOMATIC);  
+        pid.SetMode(pid.Control::automatic);
       }
     break;
     default:
@@ -163,14 +172,15 @@ float HeaterController::pid_controller(float input, float bed_left_temp, float b
 
   pid.Compute();
 
-  return (pid_status != ST_DISABLED) ? pid_output : 0;
+  return (pid_status == ST_RUN_PID) ? pid_output : 0;
 }
 
 float HeaterController::tune_controller(float input) {
   
   if (tune_status == ST_INITIALICE) {
     pid_status =  ST_DISABLED;
-    pid.SetMode(MANUAL);
+    //pid.SetMode(MANUAL);
+    pid.SetMode(pid.Control::manual);
     pid_output = 0;   
     fan_cooler(OUT_ON); 
     pid_setpoint = 0;
