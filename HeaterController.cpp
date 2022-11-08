@@ -65,11 +65,11 @@ bool ret_val;
   return ret_val;
 }
 
-float HeaterController::update(float box_temp, float bed_left_temp, float bed_right_temp) {
+float HeaterController::update(float box_temp, float bed_temp) {
 float output = 0;
   
   if (_mode == MODE_RUN_PID) {
-    output = pid_controller(box_temp, bed_left_temp, bed_right_temp);
+    output = pid_controller(box_temp, bed_temp);
   } else if (_mode == MODE_RUN_TUNE){
     output = tune_controller(box_temp);
   }
@@ -130,8 +130,8 @@ void  HeaterController::fan_cooler(int output) {
   digitalWrite(FAN_PIN, (output == OUT_ON) ? HIGH : LOW );
 }
 
-float HeaterController::pid_controller(float input, float bed_left_temp, float bed_right_temp) {
-  pid_input = input;
+float HeaterController::pid_controller(float box_temp, float bed_temp) {
+  pid_input = box_temp;
 
   switch (pid_status) {
     case ST_DISABLED:
@@ -151,14 +151,14 @@ float HeaterController::pid_controller(float input, float bed_left_temp, float b
       fan_cooler(OUT_ON);
     break;
     case ST_RUN_PID:
-      if ( max(bed_left_temp, bed_right_temp) > max_bed_temp ) {
+      if (bed_temp > max_bed_temp) {
         //pid.SetMode(MANUAL);
         pid.SetMode(pid.Control::manual);
         pid_status = ST_WAIT_BED_TEMP_DROP;
       }
     break;
     case ST_WAIT_BED_TEMP_DROP: 
-      if ( max(bed_left_temp, bed_right_temp) < (max_bed_temp - 5) ) {
+      if (bed_temp < (max_bed_temp - 5)) {
         pid_status = ST_RUN_PID;
         //pid_output = 0; // tune_output_step;
         //pid.SetMode(AUTOMATIC);  

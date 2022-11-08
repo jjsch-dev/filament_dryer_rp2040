@@ -200,10 +200,8 @@ int new_val;
   }
 }
 
-void plot_pid(float pwm_val) {
+void plot_pid(float pwm_val, float bed_temp) {
   if (Serial) {
-    float  bed_temp = max(sensors.bed_left_celcius(), sensors.bed_right_celcius());
-    
     pwm_val /= PWM_RESOLUTION;
     pwm_val *= 100;
         
@@ -283,9 +281,8 @@ void loop() {
 
   // Displays the firmware version screen for a seconds or until the encoder is pressed.
   if (!display_version()) {
-    float pwm_val = heater.update(sensors.box_celcius(), 
-                                  sensors.bed_left_celcius(),
-                                  sensors.bed_right_celcius());
+    float  bed_temp = max(sensors.bed_left_celcius(), sensors.bed_right_celcius());
+    float pwm_val = heater.update(sensors.box_celcius(), bed_temp);
   
     // Once per second.
     if (refresh_display >= 10) {
@@ -304,7 +301,7 @@ void loop() {
        * Note: The output is converted to percentage.
        */
       if (heater.get_mode() != MODE_STOP) { 
-        plot_pid(pwm_val); 
+        plot_pid(pwm_val, bed_temp); 
       }
     }
   }
