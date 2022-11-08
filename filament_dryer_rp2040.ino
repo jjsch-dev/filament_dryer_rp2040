@@ -200,19 +200,33 @@ int new_val;
   }
 }
 
+/*
+ * It sends the controller parameters through the serial port to graph the behavior 
+ * curve of the system, both in PID and Tune modes.
+ * Note: Since the system takes more than 20 minutes to stabilize, it sends a sample 
+ * every 5 seconds so that it can be displayed in 500 samples.
+ */
 void plot_pid(float pwm_val, float bed_temp) {
+static uint8_t plot_delay = 0;
+  
   if (Serial) {
-    pwm_val /= PWM_RESOLUTION;
-    pwm_val *= 100;
-        
-    Serial.print(F("Setpoint:"));     Serial.print(heater.get_setpoint());  Serial.print(F(", "));
-    Serial.print(F("BoxTemp:"));      Serial.print(sensors.box_celcius());  Serial.print(F(", "));
-    Serial.print(F("BoxHumidity:"));  Serial.print(sensors.box_humidity()); Serial.print(F(", "));
-    Serial.print(F("PWM:"));          Serial.print(pwm_val);                Serial.print(F(", "));
-    Serial.print(F("BedTemp:"));      Serial.print(bed_temp);               Serial.print(F(", "));
-    Serial.print(F("BedMax:"));       Serial.print(BED_MAX_TEMP);
-               
-    Serial.println();
+    if (heater.get_mode() == MODE_STOP) { 
+      plot_delay = 0; 
+    } else if (plot_delay++ == 0) {
+      pwm_val /= PWM_RESOLUTION;
+      pwm_val *= 100;
+          
+      Serial.print(F("Setpoint:"));     Serial.print(heater.get_setpoint());  Serial.print(F(", "));
+      Serial.print(F("BoxTemp:"));      Serial.print(sensors.box_celcius());  Serial.print(F(", "));
+      Serial.print(F("BoxHumidity:"));  Serial.print(sensors.box_humidity()); Serial.print(F(", "));
+      Serial.print(F("PWM:"));          Serial.print(pwm_val);                Serial.print(F(", "));
+      Serial.print(F("BedTemp:"));      Serial.print(bed_temp);               Serial.print(F(", "));
+      Serial.print(F("BedMax:"));       Serial.print(BED_MAX_TEMP);
+                 
+      Serial.println();
+    } else if (plot_delay >= 5) {
+      plot_delay = 0;
+    }
   }
 }
 
@@ -300,9 +314,7 @@ void loop() {
        * Use the Arduino Plotter to plot the system response.
        * Note: The output is converted to percentage.
        */
-      if (heater.get_mode() != MODE_STOP) { 
-        plot_pid(pwm_val, bed_temp); 
-      }
+      plot_pid(pwm_val, bed_temp);
     }
   }
 }

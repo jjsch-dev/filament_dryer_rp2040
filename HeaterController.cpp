@@ -86,7 +86,7 @@ void HeaterController::inc_setpoint(int count) {
     pid_setpoint = MIN_SETPOINT;    
   } else if(new_val < MIN_SETPOINT) {
     pid_setpoint = 0; 
-  }else if (new_val <= MAX_SETPOINT) {
+  } else if (new_val <= MAX_SETPOINT) {
     pid_setpoint = new_val;
   }    
 }
@@ -100,7 +100,6 @@ int HeaterController::get_mode(void) {
 }
 
 void HeaterController::set_mode(int new_mode) {
-
   /* 
    *  If the mode is to stop the heater, it turns off the fan and the PWM output. 
    *  Initializes the PID or Tuner when the previous mode is different from the current one.
@@ -172,7 +171,6 @@ float HeaterController::pid_controller(float box_temp, float bed_temp) {
 }
 
 float HeaterController::tune_controller(float input) {
-  
   if (tune_status == ST_INITIALICE) {
     pid_status =  ST_DISABLED;
     pid.SetMode(pid.Control::manual);
@@ -187,18 +185,19 @@ float HeaterController::tune_controller(float input) {
     uint8_t state = tuner.Run();
     
     switch (state) {
-      case tuner.sample: // active once per sample during test
+      case tuner.sample: 
         tune_input = input;
         tune_samples_count++;
       break;
-  
-      case tuner.tunings: // active just once when sTune is done
+
+      // update PID with the new tunings
+      case tuner.tunings: 
         float kp, ki, kd;
-        tuner.GetAutoTunings(&kp, &ki, &kd); // sketch variables updated by sTune
+        tuner.GetAutoTunings(&kp, &ki, &kd); 
 
         pid_const.store(kp, ki, kd);
         
-        pid.SetTunings(kp, ki, kd); // update PID with the new tunings
+        pid.SetTunings(kp, ki, kd); 
         
         set_mode(MODE_STOP); 
       break;
