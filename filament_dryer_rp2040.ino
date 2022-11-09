@@ -224,7 +224,7 @@ static uint8_t plot_delay = 0;
       Serial.print(F("BedMax:"));       Serial.print(BED_MAX_TEMP);
                  
       Serial.println();
-    } else if (plot_delay >= 5) {
+    } else if (plot_delay >= 6) {
       plot_delay = 0;
     }
   }
