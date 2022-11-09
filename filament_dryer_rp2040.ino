@@ -35,7 +35,7 @@
  * when two pins are used. See issue:
  * https://github.com/earlephilhower/arduino-pico/issues/955
  * 
- * It is fixed with push #926 and can be used from the ppp branch using git.
+ * It is fixed with push #926 and can be used from the master branch using git.
  * https://github.com/earlephilhower/arduino-pico/pull/962
  */
 #define PWM_FREQUENCY         500       // Set a similar frequency of the Arduino Nano PWM (490Hz).
@@ -46,7 +46,15 @@
 
 #define SPLASH_VERSION_TIME   5000      // Version screen display time in mS.
 
+#define MENU_MODE_INFO        0
+#define MENU_MODE_SEL         1
+#define MENU_MODE_EDIT        2
+
 uint8_t           menu_sel = 0;
+uint8_t           menu_mode = 0;
+char*             menu_title[] = {{"Exit Cfg"}, {"Temp:"}, {"Time:"}, {"Tune:"}};
+char              menu_end = (sizeof(menu_title) / sizeof(char*)) - 1;
+
 uint8_t           refresh_display = 10;
 
 unsigned long     splash_timer;
@@ -91,29 +99,46 @@ bool ret_val = !encoder_clicked;
  * Shows the configuration menu.
  */
 void display_menu() {
-  display.clearDisplay();            // Clear the display everytime
-  display.setTextColor(WHITE);
+int y_pos = 0;
+int menu_start = (menu_sel == menu_end) ? 1 : 0;
+
+  display.clearDisplay();            
   display.setTextSize(2);
+  
+  for (int x=0; x<3; x++) {
+    if ((menu_mode == MENU_MODE_EDIT) && ((x + menu_start) == menu_sel)) {
+      display.setTextColor(BLACK, WHITE);
+    } else {
+      display.setTextColor(WHITE);
+    }
+    display.setCursor(15, y_pos);
+    display.println(menu_title[x + menu_start]);
 
-  display.setCursor(15, 0);
-  display.println("Temp:");
-  display.setCursor(80, 0);
-  display.println(heater.get_setpoint());
+    display.setCursor(80, y_pos);
+    display.setTextColor(WHITE);
+    switch(x + menu_start) {
+      case 1:
+        display.println(heater.get_setpoint());
+      break;
 
-  display.setCursor(15, 20);
-  display.println("Time:");
-  display.setCursor(80, 20);
-  display.println(timer.get_time());
+      case 2:
+        display.println(timer.get_time());
+      break;
 
-  display.setCursor(15, 40);
-  display.println("Tune:");
-  display.setCursor(80, 40);
-  if (heater.get_mode() == MODE_RUN_TUNE) {
-    display.println("ON");
-  } else {
-    display.println("OFF");
+      case 3:
+        if (heater.get_mode() == MODE_RUN_TUNE) {
+          display.println("ON");
+        } else {
+          display.println("OFF");
+        }
+      break;
+    }
+    
+    y_pos += 20;
   }
-  display.setCursor(2, (menu_sel - 1) * 20);
+  
+  display.setTextColor(WHITE);
+  display.setCursor(2, (menu_sel - menu_start) * 20);
   display.println(">");
 
   display.display();
@@ -156,27 +181,38 @@ char buff[100];
 
 /**
  * Process the click event.
+ * To exit the settings, you need to select the exit menu and press click. 
+ * To modify a parameter, you need to select it with the encoder and click to enter 
+ * edit mode, then it is possible to use the encoder to decrease or increase it.
  */
 void on_click(EncoderButton& eb) {
 
-  if (menu_sel++ < 3) {
-    display_menu();
-  } else {
+  if (menu_mode == MENU_MODE_INFO) {
+    menu_mode = MENU_MODE_SEL;
     menu_sel = 0;
-    
-    refresh_display = 10;
-    if (heater.get_mode() == MODE_RUN_TUNE) {
-      timer.reset();  
-    } else {
-      if ((heater.get_setpoint() > 0) && (timer.get_time() > 0)) {
-        heater.set_mode(MODE_RUN_PID);
-        timer.start();
+  } else if (menu_mode == MENU_MODE_SEL) {
+    if (menu_sel == 0){
+      refresh_display = 10;
+      if (heater.get_mode() == MODE_RUN_TUNE) {
+        timer.reset();  
       } else {
-        heater.set_mode(MODE_STOP);
-        timer.reset();
+        if ((heater.get_setpoint() > 0) && (timer.get_time() > 0)) {
+          heater.set_mode(MODE_RUN_PID);
+          timer.start();
+        } else {
+          heater.set_mode(MODE_STOP);
+          timer.reset();
+        }
       }
-    } 
-  }
+      menu_mode = MENU_MODE_INFO;   
+    } else {
+      menu_mode = MENU_MODE_EDIT;
+    }
+  } else if (menu_mode == MENU_MODE_EDIT) {
+    menu_mode = MENU_MODE_SEL;
+  } 
+  
+  display_menu();
 
   encoder_clicked = true;
 }
@@ -187,15 +223,23 @@ void on_click(EncoderButton& eb) {
 void on_encoder(EncoderButton& eb) {
 int new_val;
 
-  if (menu_sel > 0) {
-    if (menu_sel == 1) {
-      heater.inc_setpoint(eb.increment());
-    } else if (menu_sel == 2) {
-      timer.inc_time(eb.increment());
-    } else if (menu_sel == 3) {
-      heater.set_mode((eb.increment() > 0) ? MODE_RUN_TUNE : MODE_STOP);
+  if (menu_mode != MENU_MODE_INFO) {
+    if (menu_mode == MENU_MODE_EDIT) {
+      if (menu_sel == 1) {
+        heater.inc_setpoint(eb.increment());
+      } else if (menu_sel == 2) {
+        timer.inc_time(eb.increment());
+      } else if (menu_sel == 3) {
+        heater.set_mode((eb.increment() > 0) ? MODE_RUN_TUNE : MODE_STOP);
+      }
+    } else if (menu_mode == MENU_MODE_SEL) {
+      uint8_t new_val = menu_sel + eb.increment();
+
+      if ((new_val >= 0) && (new_val <= menu_end) ) {
+        menu_sel = new_val;
+      }
     }
-  
+      
     display_menu();
   }
 }
@@ -305,7 +349,7 @@ void loop() {
      /*
       * Shows status information, when not in setup mode.
       */
-      if (menu_sel == 0) {  
+      if (menu_mode == MENU_MODE_INFO) {  
         update_display_info();
       }
       
