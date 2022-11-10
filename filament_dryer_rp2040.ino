@@ -53,7 +53,7 @@
 uint8_t           menu_sel = 0;
 uint8_t           menu_mode = 0;
 char*             menu_title[] = {{"Exit Cfg"}, {"Temp:"}, {"Time:"}, {"Tune:"}};
-char              menu_end = (sizeof(menu_title) / sizeof(char*)) - 1;
+uint8_t           menu_end = (sizeof(menu_title) / sizeof(char*)) - 1;
 
 uint8_t           refresh_display = 10;
 
@@ -180,10 +180,10 @@ char buff[100];
 }
 
 /**
- * Process the click event.
- * To exit the settings, you need to select the exit menu and press click. 
- * To modify a parameter, you need to select it with the encoder and click to enter 
- * edit mode, then it is possible to use the encoder to decrease or increase it.
+ * Processes the click event.
+ * To finish the configuration, select the exit menu and press click.
+ * To modify a parameter, select it with the encoder, click to enter edit mode, 
+ * then use the encoder to change the value.
  */
 void on_click(EncoderButton& eb) {
 
@@ -248,7 +248,7 @@ int new_val;
  * It sends the controller parameters through the serial port to graph the behavior 
  * curve of the system, both in PID and Tune modes.
  * Note: Since the system takes more than 20 minutes to stabilize, it sends a sample 
- * every 5 seconds so that it can be displayed in 500 samples.
+ * every 6 seconds so that it can be displayed in 500 samples.
  */
 void plot_pid(float pwm_val, float bed_temp) {
 static uint8_t plot_delay = 0;
