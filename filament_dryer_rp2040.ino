@@ -181,9 +181,9 @@ char buff[100];
 
 /**
  * Processes the click event.
- * To finish the configuration, select the exit menu and press click.
- * To modify a parameter, select it with the encoder, click to enter edit mode, 
- * then use the encoder to change the value.
+ * To finish the configuration, with the encoder select the exit menu and press click.
+ * To modify a parameter, select it with the encoder, click to edit, then use the 
+ * encoder to change the value.
  */
 void on_click(EncoderButton& eb) {
 
