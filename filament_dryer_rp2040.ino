@@ -5,28 +5,12 @@
  * Uses a bed heating to remove moisture from the air in order to 
  * prevent filament degradation and improve 3D printing quality.
  */ 
-#include <Wire.h>
-#include <EncoderButton.h>
-
-#include <Adafruit_SSD1306.h>
 #include "TempSensors.h"
 #include "HeaterController.h"
 #include "RunTimer.h"
+#include "UserInterface.h"
 
-#define FIRMWARE_VERSION      "0.0.10"  // Version actual del firmware.
-
-#define SCREEN_WIDTH          128       // OLED display width, in pixels
-#define SCREEN_HEIGHT         64        // OLED display height, in pixels
-#define OLED_RESET            -1        // Reset pin # (or -1 if sharing Arduino reset pin)
-#define OLED_ADDR             0x3C
-
-#define OLED_WIRE             Wire1
-#define OLED_SDA_PIN          2
-#define OLED_SCL_PIN          3
-
-#define ENCONDER_CLK_PIN      6
-#define ENCONDER_DT_PIN       7
-#define ENCONDER_BUTTON_PIN   8
+#define FIRMWARE_VERSION      "0.1.0"   // Version actual del firmware.
 
 #define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 
@@ -46,102 +30,147 @@
 
 #define SPLASH_VERSION_TIME   5000      // Version screen display time in mS.
 
-#define MENU_MODE_INFO        0
-#define MENU_MODE_SEL         1
-#define MENU_MODE_EDIT        2
-
-uint8_t           menu_sel = 0;
-uint8_t           menu_mode = 0;
-char*             menu_title[] = {{"Exit Cfg"}, {"Temp:"}, {"Time:"}, {"Tune:"}};
-uint8_t           menu_end = (sizeof(menu_title) / sizeof(char*)) - 1;
+menu_item_t menu_list[] = {
+  {"Exit", MENU_MODE_EXIT, 80}, 
+  {"Temp:", MENU_MODE_EDIT, 80}, 
+  {"Time:", MENU_MODE_EDIT, 80}, 
+  {"Tune:", MENU_MODE_EDIT, 80},
+  {"Bed:", MENU_MODE_INFO, 80},
+  {"Kp:", MENU_MODE_INFO, 60},
+  {"Ki:", MENU_MODE_INFO, 60},
+  {"Kd:", MENU_MODE_INFO, 60},
+  {"V:", MENU_MODE_INFO, 50}
+};
 
 uint8_t           refresh_display = 10;
-
 unsigned long     splash_timer;
-bool              encoder_clicked = false;
 
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP);
-Adafruit_SSD1306  display(SCREEN_WIDTH, SCREEN_HEIGHT, &OLED_WIRE, OLED_RESET); 
-EncoderButton     *eb; 
 RunTimer          timer(MAX_HOURS);
+
+/*
+ * Callback function that invokes the UI when it needs to update the 
+ * parameters of each configuration menu item.
+ */
+char* callback_menu_get(char* value, int item_id) {
+  switch(item_id) {
+      case 1:
+        sprintf(value, "%d", heater.get_setpoint());
+      break;
+      case 2:
+        sprintf(value, "%d", timer.get_time());
+      break;
+      case 3:
+        if (heater.get_mode() == MODE_RUN_TUNE) {
+          sprintf(value, "ON");
+        } else {
+          sprintf(value, "OFF");
+        }
+      break;
+      case 4:
+        sprintf(value, "%02.0f", max(sensors.bed_left_celcius(), sensors.bed_right_celcius()));
+      break;
+      case 5:
+        sprintf(value, "%2.2f", heater.pid_const.kp());
+      break;
+      case 6:
+        sprintf(value, "%2.2f", heater.pid_const.ki());
+      break;
+      case 7:
+        sprintf(value, "%2.2f", heater.pid_const.kd());
+      break;
+      case 8:
+        sprintf(value, "%s", FIRMWARE_VERSION);
+      break;
+      default:
+        sprintf(value, "--");
+      break;
+    }
+
+    return value;
+}
+
+/*
+ * Check if it is necessary to go to PID run mode
+ */
+void check_if_start_pid(void) {
+  if ((heater.get_setpoint() > 0) && (timer.get_time() > 0)) {
+    if (heater.get_mode() == MODE_RUN_TUNE) {
+      // In tuner mode, the set point is fixed at 50 degrees. And when it goes into 
+      // stop mode, it resets to zero, so you have to save it for later use.
+      int setpoint = heater.get_setpoint();
+      heater.set_mode(MODE_STOP);  
+      heater.inc_setpoint(setpoint);
+    } 
+    
+    heater.set_mode(MODE_RUN_PID);
+    timer.start();
+  }   
+}
+
+/*
+ * Callback function that invokes the UI when it needs to change the 
+ * parameters of one configuration menu item.
+ */
+bool callback_menu_set(int value, int item_id, int item_type) {
+  if(item_type == MENU_MODE_EXIT) {
+    refresh_display = 10;
+    if (heater.get_mode() == MODE_RUN_TUNE) { 
+      if((heater.get_setpoint() == 0) || (timer.get_time() == 0)) {
+        heater.set_mode(MODE_STOP);
+        timer.reset();
+      }
+    }
+  } else {
+    switch (item_id) {
+      case 1: 
+        heater.inc_setpoint(value);
+        check_if_start_pid();
+      break;
+      case 2:
+        timer.inc_time(value);
+        check_if_start_pid();
+      break;
+      case 3: 
+        heater.set_mode((value > 0) ? MODE_RUN_TUNE : MODE_STOP);
+        timer.reset();
+      break;
+      default:
+        return false;
+    }
+  }
+
+  return true;
+}
+
+UserInterface ui(menu_list, sizeof(menu_list), callback_menu_get, callback_menu_set);
 
 /*
  * Displays the firmware version screen for 3 seconds or until the encoder is pressed.
  */
 bool display_version() {
-bool ret_val = !encoder_clicked;
+bool ret_val = (ui.clicks() == 0);
 
   if (ret_val) {
     ret_val = (splash_timer + SPLASH_VERSION_TIME > millis());
     
     if (ret_val) { 
-      display.clearDisplay();             
-      display.setTextSize(2);                
-      display.setTextColor(WHITE);             
+      ui.display.clearDisplay();             
+      ui.display.setTextSize(2);                
+      ui.display.setTextColor(WHITE);             
     
-      display.setCursor(15, 0);
-      display.println("Filament");
-      display.setCursor(35, 20);
-      display.println("Dryer");
-      display.setCursor(35, 40);   
-      display.print(FIRMWARE_VERSION);
-      display.display();
-    } else {
-      encoder_clicked = true;  
-    }
+      ui.display.setCursor(15, 0);
+      ui.display.println("Filament");
+      ui.display.setCursor(35, 20);
+      ui.display.println("Dryer");
+      ui.display.setCursor(35, 40);   
+      ui.display.print(FIRMWARE_VERSION);
+      ui.display.display();
+    } 
   }
 
   return ret_val;
-}
-
-/*
- * Shows the configuration menu.
- */
-void display_menu() {
-int y_pos = 0;
-int menu_start = (menu_sel == menu_end) ? 1 : 0;
-
-  display.clearDisplay();            
-  display.setTextSize(2);
-  
-  for (int x=0; x<3; x++) {
-    if ((menu_mode == MENU_MODE_EDIT) && ((x + menu_start) == menu_sel)) {
-      display.setTextColor(BLACK, WHITE);
-    } else {
-      display.setTextColor(WHITE);
-    }
-    display.setCursor(15, y_pos);
-    display.println(menu_title[x + menu_start]);
-
-    display.setCursor(80, y_pos);
-    display.setTextColor(WHITE);
-    switch(x + menu_start) {
-      case 1:
-        display.println(heater.get_setpoint());
-      break;
-
-      case 2:
-        display.println(timer.get_time());
-      break;
-
-      case 3:
-        if (heater.get_mode() == MODE_RUN_TUNE) {
-          display.println("ON");
-        } else {
-          display.println("OFF");
-        }
-      break;
-    }
-    
-    y_pos += 20;
-  }
-  
-  display.setTextColor(WHITE);
-  display.setCursor(2, (menu_sel - menu_start) * 20);
-  display.println(">");
-
-  display.display();
 }
 
 /*
@@ -150,98 +179,33 @@ int menu_start = (menu_sel == menu_end) ? 1 : 0;
 void update_display_info() {
 char buff[100];
   
-  display.clearDisplay();             
-  display.setTextSize(2);                
-  display.setTextColor(WHITE);             
+  ui.display.clearDisplay();             
+  ui.display.setTextSize(2);                
+  ui.display.setTextColor(WHITE);             
   
-  display.setCursor(22, 0);   
+  ui.display.setCursor(22, 0);   
   sprintf(buff, "%02.0f/%02d C", sensors.box_celcius(), heater.get_setpoint());
-  display.print(buff);
+  ui.display.print(buff);
 
   if (heater.get_mode() == MODE_RUN_TUNE) {
-    display.setCursor(10, 22);
+    ui.display.setCursor(10, 22);
     sprintf(buff, "Bed %02.0f-%02.0f", sensors.bed_left_celcius(), sensors.bed_right_celcius());
   } else {
-    display.setCursor(15, 22);
+    ui.display.setCursor(15, 22);
     sprintf(buff, "%02d:%02d:%02d", timer.get_hours(), timer.get_minutes(), timer.get_seconds());
   }
-  display.print(buff); 
+  ui.display.print(buff); 
   
   if (heater.get_mode() == MODE_RUN_TUNE) {
-    display.setCursor(10, 42);
+    ui.display.setCursor(10, 42);
     sprintf(buff, "Tune %02d %%", heater.tuning_percentage());
   } else {
-    display.setCursor(27, 42);
+    ui.display.setCursor(27, 42);
     sprintf(buff, "%02.1f %%", sensors.box_humidity());
   }
-  display.print(buff); 
+  ui.display.print(buff); 
   
-  display.display();                 
-}
-
-/**
- * Processes the click event.
- * To finish the configuration, with the encoder select the exit menu and press click.
- * To modify a parameter, select it with the encoder, click to edit, then use the 
- * encoder to change the value.
- */
-void on_click(EncoderButton& eb) {
-
-  if (menu_mode == MENU_MODE_INFO) {
-    menu_mode = MENU_MODE_SEL;
-    menu_sel = 0;
-  } else if (menu_mode == MENU_MODE_SEL) {
-    if (menu_sel == 0){
-      refresh_display = 10;
-      if (heater.get_mode() == MODE_RUN_TUNE) {
-        timer.reset();  
-      } else {
-        if ((heater.get_setpoint() > 0) && (timer.get_time() > 0)) {
-          heater.set_mode(MODE_RUN_PID);
-          timer.start();
-        } else {
-          heater.set_mode(MODE_STOP);
-          timer.reset();
-        }
-      }
-      menu_mode = MENU_MODE_INFO;   
-    } else {
-      menu_mode = MENU_MODE_EDIT;
-    }
-  } else if (menu_mode == MENU_MODE_EDIT) {
-    menu_mode = MENU_MODE_SEL;
-  } 
-  
-  display_menu();
-
-  encoder_clicked = true;
-}
-
-/**
- * Procces the 'encoder' event
- */
-void on_encoder(EncoderButton& eb) {
-int new_val;
-
-  if (menu_mode != MENU_MODE_INFO) {
-    if (menu_mode == MENU_MODE_EDIT) {
-      if (menu_sel == 1) {
-        heater.inc_setpoint(eb.increment());
-      } else if (menu_sel == 2) {
-        timer.inc_time(eb.increment());
-      } else if (menu_sel == 3) {
-        heater.set_mode((eb.increment() > 0) ? MODE_RUN_TUNE : MODE_STOP);
-      }
-    } else if (menu_mode == MENU_MODE_SEL) {
-      uint8_t new_val = menu_sel + eb.increment();
-
-      if ((new_val >= 0) && (new_val <= menu_end) ) {
-        menu_sel = new_val;
-      }
-    }
-      
-    display_menu();
-  }
+  ui.display.display();                 
 }
 
 /*
@@ -295,24 +259,8 @@ static bool one_time = true;
  */
 void setup() {
   Serial.begin(115200);
-  
-  /*
-   * With a global instance of the object, the constructor is called before the Arduino 
-   * core is initialized, and the attachInterrupt() function does not work. 
-   * That's why many object libraries have a '.begin()' member function. 
-   * You can also use new to create the object in the config function.
-   */
-  eb = new EncoderButton(ENCONDER_DT_PIN, ENCONDER_CLK_PIN, ENCONDER_BUTTON_PIN);
-  eb->setPressedHandler(on_click);
-  eb->setEncoderHandler(on_encoder);
-  eb->setDebounceInterval(10);
 
-  OLED_WIRE.setSDA(OLED_SDA_PIN);
-  OLED_WIRE.setSCL(OLED_SCL_PIN);
-   
-  display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR); //Start the OLED display
-  display.clearDisplay();
-  display.display();
+  ui.begin();
 
   sensors.begin();
   
@@ -323,9 +271,9 @@ void setup() {
 
 void loop() {
   show_intro_msg();
-  
-  eb->update();
 
+  int menu_mode = ui.update();
+  
   // when the timer in hours expires, it stops the heater.
   if (timer.update()) {
     heater.set_mode(MODE_STOP);
