@@ -34,7 +34,7 @@ static void wrapper_on_encoder(EncoderButton& eb) {
   p_ui->on_encoder(eb.increment()); 
 }
 
-UserInterface::UserInterface(menu_item_t* m_list, int m_size) :
+UserInterface::UserInterface(menu_item_t* m_list, sizeof m_size) :
                display(SCREEN_WIDTH, SCREEN_HEIGHT, &OLED_WIRE, OLED_RESET) {
   menu_list = m_list; 
   item_count= m_size / sizeof(menu_item_t);

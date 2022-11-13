@@ -79,7 +79,7 @@ public:
 
 private:
   EncoderButton     *eb; 
-  menu_item_t*      menu_list;
+  menu_item_t       *menu_list;
   int               item_count; 
   int               menu_sel;
   int               menu_mode;
