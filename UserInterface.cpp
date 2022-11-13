@@ -51,9 +51,12 @@ int UserInterface::update() {
   return menu_mode;
 }
 
-bool UserInterface::begin(callback_get_t c_get, callback_set_t c_set) {
+bool UserInterface::begin(callback_get_t c_get, callback_set_t c_set,
+                          callback_end_edit_t c_end_edit, callback_exit_t c_exit) {
   item_get  = c_get;
   item_set  = c_set;
+  end_edit  = c_end_edit;
+  menu_exit = c_exit;
   
   /*
    * With a global instance of the object, the constructor is called before the Arduino 
@@ -130,13 +133,14 @@ void UserInterface::on_click(void) {
     menu_mode = MENU_MODE_SEL;
     menu_sel = 0;
   } else if (menu_mode == MENU_MODE_SEL) {
-    if (menu_sel == 0) {
-      item_set(0, menu_sel, menu_list[menu_sel].type);
+    if (menu_list[menu_sel].type == MENU_MODE_EXIT) {
+      menu_exit(menu_sel);
       menu_mode = MENU_MODE_INFO;   
     } else if (menu_list[menu_sel].type == MENU_MODE_EDIT) {
       menu_mode = MENU_MODE_EDIT;
     }
   } else if (menu_mode == MENU_MODE_EDIT) {
+    end_edit(menu_sel);
     menu_mode = MENU_MODE_SEL;
   } 
   
@@ -153,7 +157,7 @@ int new_val;
 
   if (menu_mode != MENU_MODE_INFO) {
     if (menu_mode == MENU_MODE_EDIT) {
-      item_set(increment, menu_sel, menu_list[menu_sel].type);
+      item_set(increment, menu_sel);
     } else if (menu_mode == MENU_MODE_SEL) {
       uint8_t new_val = menu_sel + increment;
 

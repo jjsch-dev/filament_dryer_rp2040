@@ -1,6 +1,5 @@
 /**
- * Stores PID constants and another params in EEPROM.  
- * As the RP2040 does not have EEPROM, picoarduino simulates it with a flash page.
+ * Setup menu definition.
  * 
  * MIT License
  * 
@@ -25,42 +24,30 @@
  */ 
 #pragma once
 
-#define CONST_INITED        0x434f4e13 //53        // ASCII = CONS
+#include "UserInterface.h"
 
-#define ADDRESS_MAGIC_NUM   0
-#define ADDRESS_KP          ADDRESS_MAGIC_NUM + sizeof(int)
-#define ADDRESS_KI          ADDRESS_KP + sizeof(float)
-#define ADDRESS_KD          ADDRESS_KI + sizeof(float) 
-#define ADDRESS_THERMS      ADDRESS_KD + sizeof(float) 
+#define MNU_EXIT_ID                 0
+#define MNU_BOX_TEMP_ID             1
+#define MNU_REMAINING_TIME_ID       2
+#define MNU_TUNE_ENABLE_ID          3
+#define MNU_THERMISTORS_ID          4
+#define MNU_HEATER_TEMP_ID          5
+#define MNU_KP_ID                   6
+#define MNU_KI_ID                   7
+#define MNU_KD_ID                   8
+#define MNU_FIRMWARE_VERSION_ID     9
 
-class ParamStorage  
-{
-public:
-  ParamStorage(float kp, float ki, float kd, int therms);
-  ~ParamStorage() {};
-  
-  bool begin();
-  float kp(void);
-  float ki(void);
-  float kd(void);
-  int   therms(void);
-  
-  float read_kp(void);
-  float read_ki(void);
-  float read_kd(void);
-  int   read_therms(void);
-  
-  void write_pid_const(float kp, float ki, float kd);
-  void write_therms(int therms);
-  void save(void);
-  
-private:
-  int read_magic(void);
-  void write_magic(int val);
-  
-  float _kp;  
-  float _ki;
-  float _kd; 
-  int _therms;
-  int magic_number;
+menu_item_t menu_list[] = {
+  {"Exit", MENU_MODE_EXIT, 80}, 
+  {"Temp:", MENU_MODE_EDIT, 80}, 
+  {"Time:", MENU_MODE_EDIT, 80}, 
+  {"Tune:", MENU_MODE_EDIT, 80},
+  {"Therm:", MENU_MODE_EDIT, 80},
+  {"Heat:", MENU_MODE_INFO, 80},
+  {"Kp:", MENU_MODE_INFO, 60},
+  {"Ki:", MENU_MODE_INFO, 60},
+  {"Kd:", MENU_MODE_INFO, 60},
+  {"V:", MENU_MODE_INFO, 50}
 };
+
+

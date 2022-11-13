@@ -28,7 +28,7 @@
 #include "TempSensors.h"
 #include "HeaterController.h"
 #include "RunTimer.h"
-#include "UserInterface.h"
+#include "menu_config.h"
 #include "ParamStorage.h"
 
 #define FIRMWARE_VERSION      "0.1.0"   // Version actual del firmware.
@@ -51,19 +51,6 @@
 
 #define SPLASH_VERSION_TIME   5000      // Version screen display time in mS.
 
-menu_item_t menu_list[] = {
-  {"Exit", MENU_MODE_EXIT, 80}, 
-  {"Temp:", MENU_MODE_EDIT, 80}, 
-  {"Time:", MENU_MODE_EDIT, 80}, 
-  {"Tune:", MENU_MODE_EDIT, 80},
-  {"Therm:", MENU_MODE_EDIT, 80},
-  {"Heat:", MENU_MODE_INFO, 80},
-  {"Kp:", MENU_MODE_INFO, 60},
-  {"Ki:", MENU_MODE_INFO, 60},
-  {"Kd:", MENU_MODE_INFO, 60},
-  {"V:", MENU_MODE_INFO, 50}
-};
-
 uint8_t           refresh_display = 10;
 unsigned long     splash_timer;
 
@@ -79,35 +66,35 @@ UserInterface     ui(menu_list, sizeof(menu_list));
  */
 char* callback_menu_get(char* value, int item_id) {
   switch (item_id) {
-      case 1:
+      case MNU_BOX_TEMP_ID:
         sprintf(value, "%d", heater.get_setpoint());
       break;
-      case 2:
+      case MNU_REMAINING_TIME_ID:
         sprintf(value, "%d", timer.get_time());
       break;
-      case 3:
+      case MNU_TUNE_ENABLE_ID:
         if (heater.get_mode() == MODE_RUN_TUNE) {
           sprintf(value, "ON");
         } else {
           sprintf(value, "OFF");
         }
       break;
-      case 4:
+      case MNU_THERMISTORS_ID:
         sprintf(value, "%d", sensors.get_therms());
       break;
-      case 5:
+      case MNU_HEATER_TEMP_ID:
         sprintf(value, "%02.0f", max(sensors.bed_left_celcius(), sensors.bed_right_celcius()));
       break;
-      case 6:
+      case MNU_KP_ID:
         sprintf(value, "%2.2f", param_storage.kp());
       break;
-      case 7:
+      case MNU_KI_ID:
         sprintf(value, "%2.2f", param_storage.ki());
       break;
-      case 8:
+      case MNU_KD_ID:
         sprintf(value, "%2.2f", param_storage.kd());
       break;
-      case 9:
+      case MNU_FIRMWARE_VERSION_ID:
         sprintf(value, "%s", FIRMWARE_VERSION);
       break;
       default:
@@ -137,38 +124,53 @@ void check_if_start_pid(void) {
 }
 
 /*
+ * Callback function that invokes the UI when editing is complete.
+ */
+void callback_menu_end_edit(int item_id) {
+  switch (item_id) {
+    case MNU_THERMISTORS_ID:
+      param_storage.save();
+    break;
+  } 
+}
+
+/*
+ * Callback function that invokes the UI on exit.
+ */
+void callback_menu_exit(int item_id) {
+  refresh_display = 10;
+  
+  if (heater.get_mode() == MODE_RUN_TUNE) { 
+    if ((heater.get_setpoint() == 0) || (timer.get_time() == 0)) {
+      heater.set_mode(MODE_STOP);
+      timer.reset();
+    }
+  }
+}
+
+/*
  * Callback function that invokes the UI when it needs to change the 
  * parameters of one configuration menu item.
  */
-bool callback_menu_set(int value, int item_id, int item_type) {
-  if(item_type == MENU_MODE_EXIT) {
-    refresh_display = 10;
-    if (heater.get_mode() == MODE_RUN_TUNE) { 
-      if ((heater.get_setpoint() == 0) || (timer.get_time() == 0)) {
-        heater.set_mode(MODE_STOP);
-        timer.reset();
-      }
-    }
-  } else {
-    switch (item_id) {
-      case 1: 
-        heater.inc_setpoint(value);
-        check_if_start_pid();
-      break;
-      case 2:
-        timer.inc_time(value);
-        check_if_start_pid();
-      break;
-      case 3: 
-        heater.set_mode((value > 0) ? MODE_RUN_TUNE : MODE_STOP);
-        timer.reset();
-      break;
-      case 4:
-        param_storage.save_therms(sensors.set_therms(value));
-      break;
-      default:
-        return false;
-    }
+bool callback_menu_set(int value, int item_id) {
+  switch (item_id) {
+    case MNU_BOX_TEMP_ID: 
+      heater.inc_setpoint(value);
+      check_if_start_pid();
+    break;
+    case MNU_REMAINING_TIME_ID:
+      timer.inc_time(value);
+      check_if_start_pid();
+    break;
+    case MNU_TUNE_ENABLE_ID: 
+      heater.set_mode((value > 0) ? MODE_RUN_TUNE : MODE_STOP);
+      timer.reset();
+    break;
+    case MNU_THERMISTORS_ID:
+      sensors.set_therms(value);
+    break;
+    default:
+      return false;
   }
 
   return true;
@@ -289,8 +291,9 @@ static bool one_time = true;
 void setup() {
   Serial.begin(115200);
 
-  ui.begin(callback_menu_get, callback_menu_set);
   param_storage.begin();
+  ui.begin(callback_menu_get, callback_menu_set, 
+           callback_menu_end_edit, callback_menu_exit);
   sensors.begin();
   heater.begin();
 

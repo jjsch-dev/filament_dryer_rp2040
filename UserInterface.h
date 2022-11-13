@@ -52,7 +52,9 @@
 #define DISPLAY_LINES         3
 
 typedef char* (*callback_get_t)(char* value, int item_id);
-typedef bool (*callback_set_t)(int value, int id, int item_type);
+typedef bool (*callback_set_t)(int value, int id);
+typedef void (*callback_end_edit_t)(int id);
+typedef void (*callback_exit_t)(int id);
 
 const typedef struct menu_item_t {
 	char text[ITEM_CAPTION_LEN];
@@ -67,7 +69,8 @@ public:
   ~UserInterface() {};
 
   int update();
-  bool begin(callback_get_t c_get, callback_set_t c_set);
+  bool begin(callback_get_t c_get, callback_set_t c_set, 
+             callback_end_edit_t c_end_edit, callback_exit_t c_exit);
   void on_click(void);
   void on_encoder(int increment);
   int clicks(void);
@@ -82,9 +85,12 @@ private:
   int               menu_mode;
   int               menu_end; 
   int               click_count = 0;
-  
-  callback_get_t    item_get;
-  callback_set_t    item_set;
+
+private:  
+  callback_get_t        item_get;
+  callback_set_t        item_set;
+  callback_end_edit_t   end_edit;
+  callback_exit_t       menu_exit;
   
   void display_menu();
 };

@@ -94,29 +94,25 @@ int ParamStorage::read_therms(void) {
   return _therms;
 }
 
-void ParamStorage::save_pid(float kp, float ki, float kd){
-  EEPROM.put(ADDRESS_KP, kp);
-  EEPROM.put(ADDRESS_KI, ki);
-  EEPROM.put(ADDRESS_KD, kd);
+void ParamStorage::write_pid_const(float kp, float ki, float kd) {
+  _kp = kp;
+  _ki = ki;
+  _kd = kd;
+}
+
+void ParamStorage::write_therms(int therms) {
+  _therms = therms;
+
+}
+void ParamStorage::save(void){
+  EEPROM.put(ADDRESS_KP, _kp);
+  EEPROM.put(ADDRESS_KI, _ki);
+  EEPROM.put(ADDRESS_KD, _kd);
+  EEPROM.put(ADDRESS_THERMS, _therms);
   
   if (magic_number != CONST_INITED) {
     write_magic(CONST_INITED);
   }
-
-  _kp = kp;
-  _ki = ki;
-  _kd = kd;
   
   EEPROM.commit();
-}
-
-void ParamStorage::save_therms(int therms) {
-  EEPROM.put(ADDRESS_THERMS, therms);
-  _therms = therms;
-  
-  if (magic_number != CONST_INITED) {
-    save_pid(_kp, _ki, _kd);  
-  } else {
-    EEPROM.commit();   
-  }
 }

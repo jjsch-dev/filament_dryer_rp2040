@@ -56,7 +56,7 @@ public:
   float bed_left_celcius(void);
   float bed_right_celcius(void);
 
-  int set_therms(int count);
+  void set_therms(int count);
   int get_therms(void);
   
 private:

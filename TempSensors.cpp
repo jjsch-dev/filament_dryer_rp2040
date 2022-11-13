@@ -126,14 +126,12 @@ float TempSensors::bed_right_celcius(void) {
     return (pstorage.therms() == 2) ? bed_right_temp : 0; 
 }
 
-int TempSensors::set_therms(int count) {
+void TempSensors::set_therms(int count) {
   int new_val = pstorage.therms() + count;
 
   if ((new_val <= 0) && (new_val <= THERMS_DEFAULT) ) {
-    pstorage.save_therms(new_val);
+    pstorage.write_therms(new_val);
   }
-
-  return pstorage.therms(); 
 }
 
 int TempSensors::get_therms(void) {

@@ -208,9 +208,8 @@ float HeaterController::tune_controller(float input) {
       case tuner.tunings: 
         float kp, ki, kd;
         tuner.GetAutoTunings(&kp, &ki, &kd); 
-
-        pstorage.save_pid(kp, ki, kd);
-        
+        pstorage.write_pid_const(kp, ki, kd);
+        pstorage.save();
         pid.SetTunings(kp, ki, kd); 
         
         set_mode(MODE_STOP); 
