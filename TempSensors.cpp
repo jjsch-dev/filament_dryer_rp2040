@@ -26,7 +26,8 @@
  */ 
 #include "TempSensors.h"
 
-TempSensors::TempSensors(unsigned long timeout_ms) : 
+TempSensors::TempSensors(unsigned long timeout_ms, ParamStorage& storage) :
+             pstorage(storage), 
              sht(HTU21D_ADDR, SHT_WIRE),
              bed_left_therm(BED_LEFT_THERM_PIN, 0),
              bed_right_therm(BED_RIGHT_THERM_PIN, 0) {
@@ -39,7 +40,6 @@ TempSensors::TempSensors(unsigned long timeout_ms) :
   bed_left_temp = 0;
   bed_right_temp = 0; 
   sensor_id = 0;
-  therms = 0; 
 }
  
 bool TempSensors::begin() {
@@ -100,7 +100,7 @@ unsigned long now = millis();
         sensor_id = 0;
     }
 
-    if (sensor_id == therms) {
+    if (sensor_id == pstorage.therms()) {
       sensor_id = 0;  
     } 
     
@@ -119,23 +119,23 @@ float TempSensors::box_humidity(void) {
 }
 
 float TempSensors::bed_left_celcius(void) {
-    return (therms > 0) ? bed_left_temp : 0;
+    return (pstorage.therms() > 0) ? bed_left_temp : 0;
 }
 
 float TempSensors::bed_right_celcius(void) {
-    return (therms == 2) ? bed_right_temp : 0; 
+    return (pstorage.therms() == 2) ? bed_right_temp : 0; 
 }
 
 int TempSensors::set_therms(int count) {
-  int new_val = therms + count;
+  int new_val = pstorage.therms() + count;
 
-  if ((new_val <= 0) && (new_val <= 2) ) {
-    therms = new_val;
+  if ((new_val <= 0) && (new_val <= THERMS_DEFAULT) ) {
+    pstorage.save_therms(new_val);
   }
 
-  return therms; 
+  return pstorage.therms(); 
 }
 
 int TempSensors::get_therms(void) {
-  return therms;  
+  return pstorage.therms();  
 }

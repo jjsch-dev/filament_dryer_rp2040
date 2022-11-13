@@ -67,16 +67,13 @@ menu_item_t menu_list[] = {
 uint8_t           refresh_display = 10;
 unsigned long     splash_timer;
 
-TempSensors       sensors(SAMPLE_TIMEOUT_100MS);
-HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP);
+ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT);
+TempSensors       sensors(SAMPLE_TIMEOUT_100MS, param_storage);
+HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP, param_storage);
 RunTimer          timer(MAX_HOURS);
 UserInterface     ui(menu_list, sizeof(menu_list));
-ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT);
-                  
-void callback_tuned(float kp, float ki, float kd) {
-  param_storage.save_pid(kp, ki, kd);
-}
-        
+
+   
 /*
  * Callback function that invokes the UI when it needs to update the 
  * parameters of each configuration menu item.
@@ -301,7 +298,7 @@ void setup() {
 
   sensors.set_therms(param_storage.therms());
   
-  heater.begin(param_storage.kp(), param_storage.ki(), param_storage.kd(), callback_tuned);
+  heater.begin();
 
   splash_timer = millis();
 }

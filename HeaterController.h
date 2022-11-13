@@ -31,6 +31,8 @@
 #include <QuickPID.h>
 #include <sTune.h>
 
+#include "ParamStorage.h"
+
 #define MODE_STOP               0
 #define MODE_RUN_PID            1
 #define MODE_RUN_TUNE           2
@@ -52,18 +54,16 @@
 #define OUT_ON                  255     // MAX PWM duty cicle  
 #define OUT_OFF                 0       // MIN PWM duty cicle
 
-typedef void (*callback_tuned_t)(float kp, float ki, float kd);
-
 #define MIN_SETPOINT            40      // Minimum Box temperature. 
 #define MAX_SETPOINT            60      // Maximun Box temperature.
 
 class HeaterController 
 {
 public:
-  HeaterController(int pwm_freq, int pwm_res, float max_bed_temp);
+  HeaterController(int pwm_freq, int pwm_res, float max_bed_temp, ParamStorage& storage);
   ~HeaterController() {};
 
-  bool begin(float kp, float ki, float kd, callback_tuned_t c_tuned);
+  bool begin(void);
   float update(float box_temp, float bed_temp);
   void inc_setpoint(int count);
   int get_setpoint(void);
@@ -74,6 +74,7 @@ public:
 private:
   QuickPID  pid;
   sTune tuner; 
+  ParamStorage& pstorage;
   
   int   _mode;
   int   pid_status;
@@ -108,6 +109,4 @@ private:
   float tune_controller(float input);
   void  pwm(int output);
   void  fan_cooler(int output);
-
-  callback_tuned_t callback_tuned;
 };

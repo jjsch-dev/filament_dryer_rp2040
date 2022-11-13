@@ -25,7 +25,8 @@
  */ 
 #include "HeaterController.h"
 
-HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed) :
+HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed, ParamStorage& storage) :
+                  pstorage(storage),
                   pid(&pid_input, &pid_output, &pid_setpoint),
                   tuner(&tune_input, &tune_output, tuner.ZN_PID, tuner.directIP, tuner.printOFF) {    
   _mode = MODE_STOP;
@@ -54,9 +55,7 @@ HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed) :
   tune_setpoint = 50;
 }
 
-bool HeaterController::begin(float kp, float ki, float kd, callback_tuned_t c_tuned) {
-  callback_tuned = c_tuned;
-  
+bool HeaterController::begin(void) {
   tuner.Configure(tune_input_span, tune_output_span, tune_output_start, 
                   tune_output_step, tune_test_time_sec, tune_settle_time_sec, tune_samples);
   tuner.SetEmergencyStop(tune_temp_limit);
@@ -67,7 +66,7 @@ bool HeaterController::begin(float kp, float ki, float kd, callback_tuned_t c_tu
   pid.SetProportionalMode(pid.pMode::pOnMeas);
   pid.SetAntiWindupMode(pid.iAwMode::iAwClamp);
     
-  pid.SetTunings(kp, ki, kd);  
+  pid.SetTunings(pstorage.kp(), pstorage.ki(), pstorage.kd());  
   
   analogWriteFreq(pwm_frequency);
   analogWriteRange(pwm_resolution);
@@ -211,7 +210,7 @@ float HeaterController::tune_controller(float input) {
         float kp, ki, kd;
         tuner.GetAutoTunings(&kp, &ki, &kd); 
 
-        callback_tuned(kp, ki, kd);
+        pstorage.save_pid(kp, ki, kd);
         
         pid.SetTunings(kp, ki, kd); 
         
