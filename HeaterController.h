@@ -31,8 +31,6 @@
 #include <QuickPID.h>
 #include <sTune.h>
 
-//#include "PIDConst.h"
-
 #define MODE_STOP               0
 #define MODE_RUN_PID            1
 #define MODE_RUN_TUNE           2

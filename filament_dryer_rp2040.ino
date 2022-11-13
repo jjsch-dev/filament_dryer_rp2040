@@ -82,7 +82,7 @@ void callback_tuned(float kp, float ki, float kd) {
  * parameters of each configuration menu item.
  */
 char* callback_menu_get(char* value, int item_id) {
-  switch(item_id) {
+  switch (item_id) {
       case 1:
         sprintf(value, "%d", heater.get_setpoint());
       break;
@@ -148,7 +148,7 @@ bool callback_menu_set(int value, int item_id, int item_type) {
   if(item_type == MENU_MODE_EXIT) {
     refresh_display = 10;
     if (heater.get_mode() == MODE_RUN_TUNE) { 
-      if((heater.get_setpoint() == 0) || (timer.get_time() == 0)) {
+      if ((heater.get_setpoint() == 0) || (timer.get_time() == 0)) {
         heater.set_mode(MODE_STOP);
         timer.reset();
       }
@@ -260,7 +260,7 @@ static uint8_t plot_delay = 0;
       Serial.print(F("BoxTemp:"));      Serial.print(sensors.box_celcius());  Serial.print(F(", "));
       Serial.print(F("BoxHumidity:"));  Serial.print(sensors.box_humidity()); Serial.print(F(", "));
       Serial.print(F("PWM:"));          Serial.print(pwm_val);                Serial.print(F(", "));
-      if(sensors.get_therms() > 0) {
+      if (sensors.get_therms() > 0) {
         Serial.print(F("BedTemp:"));    Serial.print(bed_temp);               Serial.print(F(", "));
         Serial.print(F("BedMax:"));     Serial.print(BED_MAX_TEMP);
       }           
