@@ -65,7 +65,7 @@ const typedef struct menu_item_t {
 class UserInterface 
 {
 public:
-  UserInterface(menu_item_t* m_list, int m_size);
+  UserInterface(menu_item_t* m_list, size_t m_size);
   ~UserInterface() {};
 
   int update();
