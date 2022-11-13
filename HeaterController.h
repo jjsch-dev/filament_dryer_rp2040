@@ -72,8 +72,8 @@ public:
   int tuning_percentage(void );
     
 private:
-  QuickPID  pid;
-  sTune tuner; 
+  QuickPID      pid;
+  sTune         tuner; 
   ParamStorage& pstorage;
   
   int   _mode;
@@ -98,7 +98,6 @@ private:
   float     tune_temp_limit;
   uint8_t   tune_debounce;
   uint16_t  tune_samples_count;
-
   
   float     tune_input;
   float     tune_output;

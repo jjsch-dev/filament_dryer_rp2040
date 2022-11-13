@@ -204,7 +204,6 @@ float HeaterController::tune_controller(float input) {
         tune_input = input;
         tune_samples_count++;
       break;
-
       // update PID with the new tunings
       case tuner.tunings: 
         float kp, ki, kd;
