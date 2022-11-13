@@ -70,8 +70,6 @@ public:
   int get_mode(void);
   void set_mode(int mode);
   int tuning_percentage(void );
-
-  //PIDConst    pid_const;
     
 private:
   QuickPID  pid;
