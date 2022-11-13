@@ -39,6 +39,7 @@ TempSensors::TempSensors(unsigned long timeout_ms) :
   bed_left_temp = 0;
   bed_right_temp = 0; 
   sensor_id = 0;
+  therms = 0; 
 }
  
 bool TempSensors::begin() {
@@ -62,7 +63,7 @@ bool TempSensors::begin() {
    */
   pinMode(SMPS_MODE_PIN, OUTPUT);
   digitalWrite(SMPS_MODE_PIN, HIGH);
-  
+
   return true;
 }
 
@@ -93,13 +94,16 @@ unsigned long now = millis();
       
       case 2:
         bed_right_temp = bed_right_therm.analog2temp(); 
-        sensor_id = 0;
       break;
       
       default:
         sensor_id = 0;
     }
-  
+
+    if (sensor_id == therms) {
+      sensor_id = 0;  
+    } 
+    
     return true;
   }
   
@@ -115,9 +119,23 @@ float TempSensors::box_humidity(void) {
 }
 
 float TempSensors::bed_left_celcius(void) {
-    return bed_left_temp;
+    return (therms > 0) ? bed_left_temp : 0;
 }
 
 float TempSensors::bed_right_celcius(void) {
-    return bed_right_temp; 
+    return (therms == 2) ? bed_right_temp : 0; 
+}
+
+int TempSensors::set_therms(int count) {
+  int new_val = therms + count;
+
+  if ((new_val <= 0) && (new_val <= 2) ) {
+    therms = new_val;
+  }
+
+  return therms; 
+}
+
+int TempSensors::get_therms(void) {
+  return therms;  
 }

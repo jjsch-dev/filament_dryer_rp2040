@@ -1,5 +1,5 @@
 /**
- * Stores PID constants in EEPROM.  
+ * Stores PID constants and another params in EEPROM.  
  * As the RP2040 does not have EEPROM, picoarduino simulates it with a flash page.
  * 
  * MIT License
@@ -25,71 +25,82 @@
  */ 
 #include "Arduino.h"
 #include <EEPROM.h>
-#include "PIDConst.h"
+#include "ParamStorage.h"
 
-PIDConst::PIDConst(float default_kp, float default_ki, float default_kd){
-  _kp = default_kp;
-  _ki = default_ki;
-  _kd = default_kd;
+ParamStorage::ParamStorage(float kp, float ki, float kd, int therms){
+  _kp = kp;
+  _ki = ki;
+  _kd = kd;
+  _therms = therms;
 }
 
-bool PIDConst::begin(void){
+bool ParamStorage::begin(void){
   EEPROM.begin(256);
   
   if (read_magic() == CONST_INITED){
       read_kp();
       read_ki();
       read_kd();
-  
+      read_therms();
+      
       return true;
   } 
   
   return false;
 }
 
-int PIDConst::read_magic(void) {
+int ParamStorage::read_magic(void) {
   EEPROM.get(ADDRESS_MAGIC_NUM, magic_number);
   return magic_number;
 }
 
-void PIDConst::write_magic(int val){
+void ParamStorage::write_magic(int val){
   EEPROM.put(ADDRESS_MAGIC_NUM, val);
 }
 
-float PIDConst::kp(void){
+float ParamStorage::kp(void){
   return _kp;
 }
 
-float PIDConst::ki(void){
+float ParamStorage::ki(void){
   return _ki;
 }
 
-float PIDConst::kd(void){
+float ParamStorage::kd(void){
   return _kd;
 }
 
-float PIDConst::read_kp(void){
+int ParamStorage::therms(void) {
+  return _therms;
+}
+
+float ParamStorage::read_kp(void){
   EEPROM.get(ADDRESS_KP, _kp);
   return _kp;
 }
 
-float PIDConst::read_ki(void){
+float ParamStorage::read_ki(void) {
   EEPROM.get(ADDRESS_KI, _ki);
   return _ki;
 }
 
-float PIDConst::read_kd(void){
+float ParamStorage::read_kd(void) {
   EEPROM.get(ADDRESS_KD, _kd);
   return _kd;
 }
 
-void PIDConst::store(float kp, float ki, float kd){
+int ParamStorage::read_therms(void) {
+  EEPROM.get(ADDRESS_THERMS, _therms);
+  return _therms;
+}
+
+void ParamStorage::save_pid(float kp, float ki, float kd){
   EEPROM.put(ADDRESS_KP, kp);
   EEPROM.put(ADDRESS_KI, ki);
   EEPROM.put(ADDRESS_KD, kd);
   
   if (magic_number != CONST_INITED) {
-      write_magic(CONST_INITED);
+    write_magic(CONST_INITED);
   }
 
   _kp = kp;
@@ -97,4 +108,15 @@ void PIDConst::store(float kp, float ki, float kd){
   _kd = kd;
   
   EEPROM.commit();
+}
+
+void ParamStorage::save_therms(int therms) {
+  EEPROM.put(ADDRESS_THERMS, therms);
+  _therms = therms;
+  
+  if (magic_number != CONST_INITED) {
+    save_pid(_kp, _ki, _kd);  
+  } else {
+    EEPROM.commit();   
+  }
 }

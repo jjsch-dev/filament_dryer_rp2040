@@ -1,5 +1,5 @@
 /**
- * Stores PID constants in EEPROM.  
+ * Stores PID constants and another params in EEPROM.  
  * As the RP2040 does not have EEPROM, picoarduino simulates it with a flash page.
  * 
  * MIT License
@@ -31,23 +31,28 @@
 #define ADDRESS_KP          ADDRESS_MAGIC_NUM + sizeof(int)
 #define ADDRESS_KI          ADDRESS_KP + sizeof(float)
 #define ADDRESS_KD          ADDRESS_KI + sizeof(float) 
+#define ADDRESS_THERMS      ADDRESS_KD + sizeof(float) 
 
-class PIDConst  
+class ParamStorage  
 {
 public:
-  PIDConst(float default_kp, float default_ki, float default_kd);
-  ~PIDConst() {};
+  ParamStorage(float kp, float ki, float kd, int therms);
+  ~ParamStorage() {};
   
   bool begin();
   float kp(void);
   float ki(void);
   float kd(void);
+  int   therms(void);
   
   float read_kp(void);
   float read_ki(void);
   float read_kd(void);
+  int   read_therms(void);
   
-  void store(float kp, float ki, float kd);
+  void save_pid(float kp, float ki, float kd);
+  void save_therms(int therms);
+  
 private:
   int read_magic(void);
   void write_magic(int val);
@@ -55,5 +60,6 @@ private:
   float _kp;  
   float _ki;
   float _kd; 
+  int _therms;
   int magic_number;
 };

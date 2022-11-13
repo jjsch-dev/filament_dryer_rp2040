@@ -29,6 +29,7 @@
 #include "HeaterController.h"
 #include "RunTimer.h"
 #include "UserInterface.h"
+#include "ParamStorage.h"
 
 #define FIRMWARE_VERSION      "0.1.0"   // Version actual del firmware.
 
@@ -55,7 +56,8 @@ menu_item_t menu_list[] = {
   {"Temp:", MENU_MODE_EDIT, 80}, 
   {"Time:", MENU_MODE_EDIT, 80}, 
   {"Tune:", MENU_MODE_EDIT, 80},
-  {"Bed:", MENU_MODE_INFO, 80},
+  {"Therm:", MENU_MODE_EDIT, 80},
+  {"Heat:", MENU_MODE_INFO, 80},
   {"Kp:", MENU_MODE_INFO, 60},
   {"Ki:", MENU_MODE_INFO, 60},
   {"Kd:", MENU_MODE_INFO, 60},
@@ -68,8 +70,13 @@ unsigned long     splash_timer;
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP);
 RunTimer          timer(MAX_HOURS);
-UserInterface ui(menu_list, sizeof(menu_list));
-
+UserInterface     ui(menu_list, sizeof(menu_list));
+ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT);
+                  
+void callback_tuned(float kp, float ki, float kd) {
+  param_storage.save_pid(kp, ki, kd);
+}
+        
 /*
  * Callback function that invokes the UI when it needs to update the 
  * parameters of each configuration menu item.
@@ -90,18 +97,21 @@ char* callback_menu_get(char* value, int item_id) {
         }
       break;
       case 4:
-        sprintf(value, "%02.0f", max(sensors.bed_left_celcius(), sensors.bed_right_celcius()));
+        sprintf(value, "%d", sensors.get_therms());
       break;
       case 5:
-        sprintf(value, "%2.2f", heater.pid_const.kp());
+        sprintf(value, "%02.0f", max(sensors.bed_left_celcius(), sensors.bed_right_celcius()));
       break;
       case 6:
-        sprintf(value, "%2.2f", heater.pid_const.ki());
+        sprintf(value, "%2.2f", param_storage.kp());
       break;
       case 7:
-        sprintf(value, "%2.2f", heater.pid_const.kd());
+        sprintf(value, "%2.2f", param_storage.ki());
       break;
       case 8:
+        sprintf(value, "%2.2f", param_storage.kd());
+      break;
+      case 9:
         sprintf(value, "%s", FIRMWARE_VERSION);
       break;
       default:
@@ -156,6 +166,9 @@ bool callback_menu_set(int value, int item_id, int item_type) {
       case 3: 
         heater.set_mode((value > 0) ? MODE_RUN_TUNE : MODE_STOP);
         timer.reset();
+      break;
+      case 4:
+        param_storage.save_therms(sensors.set_therms(value));
       break;
       default:
         return false;
@@ -247,9 +260,10 @@ static uint8_t plot_delay = 0;
       Serial.print(F("BoxTemp:"));      Serial.print(sensors.box_celcius());  Serial.print(F(", "));
       Serial.print(F("BoxHumidity:"));  Serial.print(sensors.box_humidity()); Serial.print(F(", "));
       Serial.print(F("PWM:"));          Serial.print(pwm_val);                Serial.print(F(", "));
-      Serial.print(F("BedTemp:"));      Serial.print(bed_temp);               Serial.print(F(", "));
-      Serial.print(F("BedMax:"));       Serial.print(BED_MAX_TEMP);
-                 
+      if(sensors.get_therms() > 0) {
+        Serial.print(F("BedTemp:"));    Serial.print(bed_temp);               Serial.print(F(", "));
+        Serial.print(F("BedMax:"));     Serial.print(BED_MAX_TEMP);
+      }           
       Serial.println();
     } else if (plot_delay >= 6) {
       plot_delay = 0;
@@ -266,9 +280,9 @@ static bool one_time = true;
   if (Serial && one_time) {
     Serial.print("Filament dryer controller - version: ");
     Serial.println(FIRMWARE_VERSION);
-    Serial.print("Kp: "); Serial.print(heater.pid_const.kp());
-    Serial.print(" Ki: "); Serial.print(heater.pid_const.ki());
-    Serial.print(" Kd: "); Serial.println(heater.pid_const.kd());
+    Serial.print("Kp: "); Serial.print(param_storage.kp());
+    Serial.print(" Ki: "); Serial.print(param_storage.ki());
+    Serial.print(" Kd: "); Serial.println(param_storage.kd());
     one_time = false;
   } 
 }
@@ -281,9 +295,13 @@ void setup() {
 
   ui.begin(callback_menu_get, callback_menu_set);
 
-  sensors.begin();
+  param_storage.begin();
   
-  heater.begin();
+  sensors.begin();
+
+  sensors.set_therms(param_storage.therms());
+  
+  heater.begin(param_storage.kp(), param_storage.ki(), param_storage.kd(), callback_tuned);
 
   splash_timer = millis();
 }

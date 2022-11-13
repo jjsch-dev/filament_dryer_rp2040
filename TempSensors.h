@@ -39,6 +39,8 @@
 #define BED_RIGHT_THERM_PIN   A1
 #define SMPS_MODE_PIN         23  // GPIO23
 
+#define THERMS_DEFAULT        2   // By default, the left and right thermistors are enabled.
+
 class TempSensors  
 {
 public:
@@ -52,6 +54,9 @@ public:
   float bed_left_celcius(void);
   float bed_right_celcius(void);
 
+  int set_therms(int count);
+  int get_therms(void);
+  
 private:
   HTU21D          sht;
   thermistor      bed_left_therm;   // Connect A0 to the 3950 temperature sensor. 
@@ -65,4 +70,5 @@ private:
   unsigned long   last_sample;
   unsigned long   sample_timeout;
   int             sensor_id;
+  int             therms;
 };
