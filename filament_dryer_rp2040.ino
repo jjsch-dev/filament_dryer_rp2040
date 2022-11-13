@@ -72,7 +72,6 @@ TempSensors       sensors(SAMPLE_TIMEOUT_100MS, param_storage);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP, param_storage);
 RunTimer          timer(MAX_HOURS);
 UserInterface     ui(menu_list, sizeof(menu_list));
-
    
 /*
  * Callback function that invokes the UI when it needs to update the 
@@ -291,13 +290,8 @@ void setup() {
   Serial.begin(115200);
 
   ui.begin(callback_menu_get, callback_menu_set);
-
   param_storage.begin();
-  
   sensors.begin();
-
-  sensors.set_therms(param_storage.therms());
-  
   heater.begin();
 
   splash_timer = millis();
