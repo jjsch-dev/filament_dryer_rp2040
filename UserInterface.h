@@ -54,8 +54,6 @@
 typedef char* (*callback_get_t)(char* value, int item_id);
 typedef bool (*callback_set_t)(int value, int id, int item_type);
 
-typedef void (*callback_enconder_t)(EncoderButton &);
-
 const typedef struct menu_item_t {
 	char text[ITEM_CAPTION_LEN];
 	int type;
@@ -65,11 +63,11 @@ const typedef struct menu_item_t {
 class UserInterface 
 {
 public:
-  UserInterface(menu_item_t* m_list, int m_size, callback_get_t c_get, callback_set_t c_set);
+  UserInterface(menu_item_t* m_list, int m_size);
   ~UserInterface() {};
 
   int update();
-  bool begin();
+  bool begin(callback_get_t c_get, callback_set_t c_set);
   void on_click(void);
   void on_encoder(int increment);
   int clicks(void);

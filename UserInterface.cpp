@@ -34,11 +34,8 @@ static void wrapper_on_encoder(EncoderButton& eb) {
   p_ui->on_encoder(eb.increment()); 
 }
 
-UserInterface::UserInterface(menu_item_t* m_list, int m_size, 
-                             callback_get_t c_get, callback_set_t c_set) :
+UserInterface::UserInterface(menu_item_t* m_list, int m_size) :
                display(SCREEN_WIDTH, SCREEN_HEIGHT, &OLED_WIRE, OLED_RESET) {
-  item_get  = c_get;
-  item_set  = c_set;
   menu_list = m_list; 
   item_count= m_size / sizeof(menu_item_t);
   menu_end  = item_count - 1;
@@ -54,7 +51,10 @@ int UserInterface::update() {
   return menu_mode;
 }
 
-bool UserInterface::begin() {
+bool UserInterface::begin(callback_get_t c_get, callback_set_t c_set) {
+  item_get  = c_get;
+  item_set  = c_set;
+  
   /*
    * With a global instance of the object, the constructor is called before the Arduino 
    * core is initialized, and the attachInterrupt() function does not work. 

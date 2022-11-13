@@ -68,6 +68,7 @@ unsigned long     splash_timer;
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP);
 RunTimer          timer(MAX_HOURS);
+UserInterface ui(menu_list, sizeof(menu_list));
 
 /*
  * Callback function that invokes the UI when it needs to update the 
@@ -163,8 +164,6 @@ bool callback_menu_set(int value, int item_id, int item_type) {
 
   return true;
 }
-
-UserInterface ui(menu_list, sizeof(menu_list), callback_menu_get, callback_menu_set);
 
 /*
  * Displays the firmware version screen for 3 seconds or until the encoder is pressed.
@@ -280,7 +279,7 @@ static bool one_time = true;
 void setup() {
   Serial.begin(115200);
 
-  ui.begin();
+  ui.begin(callback_menu_get, callback_menu_set);
 
   sensors.begin();
   
