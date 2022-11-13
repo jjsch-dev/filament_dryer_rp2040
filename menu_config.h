@@ -38,16 +38,14 @@
 #define MNU_FIRMWARE_VERSION_ID     9
 
 menu_item_t menu_list[] = {
-  {"Exit", MENU_MODE_EXIT, 80}, 
-  {"Temp:", MENU_MODE_EDIT, 80}, 
-  {"Time:", MENU_MODE_EDIT, 80}, 
-  {"Tune:", MENU_MODE_EDIT, 80},
-  {"Therm:", MENU_MODE_EDIT, 80},
-  {"Heat:", MENU_MODE_INFO, 80},
-  {"Kp:", MENU_MODE_INFO, 60},
-  {"Ki:", MENU_MODE_INFO, 60},
-  {"Kd:", MENU_MODE_INFO, 60},
-  {"V:", MENU_MODE_INFO, 50}
+  {"Exit",    MENU_MODE_EXIT, 80}, 
+  {"Temp:",   MENU_MODE_EDIT, 80}, 
+  {"Time:",   MENU_MODE_EDIT, 80}, 
+  {"Tune:",   MENU_MODE_EDIT, 80},
+  {"Therm:",  MENU_MODE_EDIT, 80},
+  {"Heat:",   MENU_MODE_INFO, 80},
+  {"Kp:",     MENU_MODE_INFO, 60},
+  {"Ki:",     MENU_MODE_INFO, 60},
+  {"Kd:",     MENU_MODE_INFO, 60},
+  {"V:",      MENU_MODE_INFO, 50}
 };
-
-

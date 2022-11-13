@@ -27,14 +27,14 @@
 #include <EEPROM.h>
 #include "ParamStorage.h"
 
-ParamStorage::ParamStorage(float kp, float ki, float kd, int therms){
+ParamStorage::ParamStorage(float kp, float ki, float kd, int therms) {
   _kp = kp;
   _ki = ki;
   _kd = kd;
   _therms = therms;
 }
 
-bool ParamStorage::begin(void){
+bool ParamStorage::begin(void) {
   EEPROM.begin(256);
   
   if (read_magic() == CONST_INITED){
@@ -42,7 +42,6 @@ bool ParamStorage::begin(void){
       read_ki();
       read_kd();
       read_therms();
-      
       return true;
   } 
   
@@ -55,18 +54,19 @@ int ParamStorage::read_magic(void) {
 }
 
 void ParamStorage::write_magic(int val){
+  magic_number = val;
   EEPROM.put(ADDRESS_MAGIC_NUM, val);
 }
 
-float ParamStorage::kp(void){
+float ParamStorage::kp(void) {
   return _kp;
 }
 
-float ParamStorage::ki(void){
+float ParamStorage::ki(void) {
   return _ki;
 }
 
-float ParamStorage::kd(void){
+float ParamStorage::kd(void) {
   return _kd;
 }
 
@@ -74,7 +74,7 @@ int ParamStorage::therms(void) {
   return _therms;
 }
 
-float ParamStorage::read_kp(void){
+float ParamStorage::read_kp(void) {
   EEPROM.get(ADDRESS_KP, _kp);
   return _kp;
 }
@@ -98,18 +98,22 @@ void ParamStorage::write_pid_const(float kp, float ki, float kd) {
   _kp = kp;
   _ki = ki;
   _kd = kd;
+  EEPROM.put(ADDRESS_KP, _kp);
+  EEPROM.put(ADDRESS_KI, _ki);
+  EEPROM.put(ADDRESS_KD, _kd);
 }
 
 void ParamStorage::write_therms(int therms) {
   _therms = therms;
-
-}
-void ParamStorage::save(void){
-  EEPROM.put(ADDRESS_KP, _kp);
-  EEPROM.put(ADDRESS_KI, _ki);
-  EEPROM.put(ADDRESS_KD, _kd);
   EEPROM.put(ADDRESS_THERMS, _therms);
-  
+}
+
+/*
+ * Since the eeprom is a simulated module in the RP2040 on Arduino, 
+ * the library's put only write the RAM buffer allocated with begin. 
+ * And when commit is called, the flash is updated by stopping the IRQs.
+ */
+void ParamStorage::save(void){
   if (magic_number != CONST_INITED) {
     write_magic(CONST_INITED);
   }
