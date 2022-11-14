@@ -141,7 +141,7 @@ void HeaterController::stop(void) {
   pwm(OUT_OFF);
   pid_status = ST_DISABLED;
   tune_status = ST_DISABLED;
-  _mode == MODE_STOP;
+  _mode = MODE_STOP;
 }
 
 void HeaterController::pwm(int output) {
