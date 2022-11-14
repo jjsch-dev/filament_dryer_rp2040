@@ -37,9 +37,9 @@
 #define MODE_RUN_PID            1
 #define MODE_RUN_TUNE           2
 
-#define KP_DEFAULT              29.576  
-#define KI_DEFAULT              0.056    
-#define KD_DEFAULT              0.222   
+#define KP_DEFAULT              35.86  
+#define KI_DEFAULT              0.07    
+#define KD_DEFAULT              0.28    
 
 #define ST_DISABLED             0
 #define ST_INITIALICE           1
@@ -70,6 +70,7 @@ public:
   int get_mode(void);
   void set_mode(int mode);
   int tuning_percentage(void );
+  void set_tunings(void);
     
 private:
   QuickPID      pid;

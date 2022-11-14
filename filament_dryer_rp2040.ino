@@ -53,6 +53,7 @@
 
 uint8_t           refresh_display = 10;
 unsigned long     splash_timer;
+bool              factory_reset;
 
 ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT);
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS, param_storage);
@@ -94,6 +95,13 @@ char* callback_menu_get(char* value, int item_id) {
       case MNU_KD_ID:
         sprintf(value, "%2.2f", param_storage.kd());
       break;
+      case MNU_FACTORY_RESET_ID:
+        if (factory_reset) {
+          sprintf(value, "ON");
+        } else {
+          sprintf(value, "OFF");
+        }
+      break;
       case MNU_FIRMWARE_VERSION_ID:
         sprintf(value, "%s", FIRMWARE_VERSION);
       break;
@@ -130,6 +138,17 @@ void callback_menu_end_edit(int item_id) {
   switch (item_id) {
     case MNU_THERMISTORS_ID:
       param_storage.save();
+    break;
+    case MNU_FACTORY_RESET_ID:
+      if (factory_reset) {
+        factory_reset = false;
+
+        heater.set_mode(MODE_STOP);
+        param_storage.write_pid_const(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT);
+        param_storage.write_therms(THERMS_DEFAULT);
+        param_storage.save();  
+        heater.set_tunings();
+      }
     break;
   } 
 }
@@ -169,6 +188,8 @@ bool callback_menu_set(int value, int item_id) {
     case MNU_THERMISTORS_ID:
       sensors.set_therms(value);
     break;
+    case MNU_FACTORY_RESET_ID:
+      factory_reset = (value > 0) ? true : false;
     default:
       return false;
   }

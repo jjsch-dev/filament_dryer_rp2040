@@ -38,11 +38,11 @@ bool ParamStorage::begin(void) {
   EEPROM.begin(256);
   
   if (read_magic() == CONST_INITED){
-      read_kp();
-      read_ki();
-      read_kd();
-      read_therms();
-      return true;
+    read_kp();
+    read_ki();
+    read_kd();
+    read_therms();
+    return true;
   } 
   
   return false;

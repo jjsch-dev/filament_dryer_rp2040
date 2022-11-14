@@ -35,17 +35,19 @@
 #define MNU_KP_ID                   6
 #define MNU_KI_ID                   7
 #define MNU_KD_ID                   8
-#define MNU_FIRMWARE_VERSION_ID     9
+#define MNU_FACTORY_RESET_ID        9
+#define MNU_FIRMWARE_VERSION_ID     10
 
 menu_item_t menu_list[] = {
   {"Exit",    MENU_MODE_EXIT, 80}, 
   {"Temp:",   MENU_MODE_EDIT, 80}, 
   {"Time:",   MENU_MODE_EDIT, 80}, 
   {"Tune:",   MENU_MODE_EDIT, 80},
-  {"Therm:",  MENU_MODE_EDIT, 80},
+  {"Therm:",  MENU_MODE_EDIT, 90},
   {"Heat:",   MENU_MODE_INFO, 80},
   {"Kp:",     MENU_MODE_INFO, 60},
   {"Ki:",     MENU_MODE_INFO, 60},
   {"Kd:",     MENU_MODE_INFO, 60},
+  {"Frst:",   MENU_MODE_EDIT, 80},
   {"V:",      MENU_MODE_INFO, 50}
 };

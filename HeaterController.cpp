@@ -66,7 +66,7 @@ bool HeaterController::begin(void) {
   pid.SetProportionalMode(pid.pMode::pOnMeas);
   pid.SetAntiWindupMode(pid.iAwMode::iAwClamp);
     
-  pid.SetTunings(pstorage.kp(), pstorage.ki(), pstorage.kd());  
+  set_tunings();  
   
   analogWriteFreq(pwm_frequency);
   analogWriteRange(pwm_resolution);
@@ -210,8 +210,7 @@ float HeaterController::tune_controller(float input) {
         tuner.GetAutoTunings(&kp, &ki, &kd); 
         pstorage.write_pid_const(kp, ki, kd);
         pstorage.save();
-        pid.SetTunings(kp, ki, kd); 
-        
+        set_tunings(); 
         set_mode(MODE_STOP); 
       break;
     } 
@@ -220,6 +219,10 @@ float HeaterController::tune_controller(float input) {
   return tune_output;
 }
 
+void HeaterController::set_tunings(void) {
+  pid.SetTunings(pstorage.kp(), pstorage.ki(), pstorage.kd());
+}
+        
 int HeaterController::tuning_percentage(void) {
   /*
    * The tuner takes a sample every 1000 mS, both in the setup time and in the 
