@@ -82,11 +82,11 @@ bool HeaterController::begin(void) {
 
 float HeaterController::update(float box_temp, float bed_temp) {
 float output = 0;
-  
+
   if (_mode == MODE_RUN_PID) {
     output = pid_controller(box_temp, bed_temp);
   } else if (_mode == MODE_RUN_TUNE){
-    output = tune_controller(box_temp);
+    output = tune_controller(box_temp, bed_temp);
   }
   
   pwm(output);
@@ -193,37 +193,51 @@ float HeaterController::pid_controller(float box_temp, float bed_temp) {
   return (pid_status == ST_RUN_PID) ? pid_output : 0;
 }
 
-float HeaterController::tune_controller(float input) {
-  if (tune_status == ST_INITIALICE) {
-    pid_status =  ST_DISABLED;
-    pid.SetMode(pid.Control::manual);
-    pid_output = 0;   
-    fan_cooler(OUT_ON); 
+float HeaterController::tune_controller(float input, float bed_temp) {
+  switch (tune_status) {
+    case ST_INITIALICE:
+      pid_status =  ST_DISABLED;
+      pid.SetMode(pid.Control::manual);
+      pid_output = 0;   
+      fan_cooler(OUT_ON); 
 
-    tuner.Reset();
-    tune_samples_count = 0;
-    tune_status = ST_RUN_PID;
-  } else if(tune_status == ST_RUN_PID) {
-    uint8_t state = tuner.Run();
-    
-    switch (state) {
-      case tuner.sample: 
-        tune_input = input;
-        tune_samples_count++;
-      break;
-      // update PID with the new tunings
-      case tuner.tunings: 
-        float kp, ki, kd;
-        tuner.GetAutoTunings(&kp, &ki, &kd); 
-        pstorage.write_pid_const(kp, ki, kd);
-        pstorage.save();
-        set_tunings(); 
-        stop(); 
-      break;
-    } 
-  }
+      tuner.Reset();
+      tune_samples_count = 0;
+      tune_status = ST_RUN_PID;
+    break;
+    case ST_RUN_PID: {
+      if (bed_temp > max_bed_temp) {
+        tune_status = ST_WAIT_BED_TEMP_DROP;
+      } else {
+        switch (tuner.Run()) {
+          case tuner.sample: 
+            tune_input = input;
+            tune_samples_count++;
+          break;
+          // update PID with the new tunings
+          case tuner.tunings: 
+            float kp, ki, kd;
+            tuner.GetAutoTunings(&kp, &ki, &kd); 
+            pstorage.write_pid_const(kp, ki, kd);
+            pstorage.save();
+            set_tunings(); 
+            stop(); 
+          break;
+        } 
+      }
+    }
+    break;
+    case ST_WAIT_BED_TEMP_DROP: 
+      if (bed_temp < (max_bed_temp - 5)) {
+        tune_status = ST_RUN_PID;
+      }
+    break;
+    default:
+      tune_status = ST_DISABLED;
+    break;
+  }  
 
-  return tune_output;
+  return (tune_status == ST_RUN_PID) ? tune_output : 0;
 }
 
 void HeaterController::set_tunings(void) {
