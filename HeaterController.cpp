@@ -47,7 +47,6 @@ HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed, Par
   tune_debounce = 1;
   tune_samples_count = 0;
   
-  pid_setpoint = 0; 
   pid_input = 0; 
   pid_output = 0;
   tune_input = 0;
@@ -65,7 +64,9 @@ bool HeaterController::begin(void) {
 
   pid.SetProportionalMode(pid.pMode::pOnMeas);
   pid.SetAntiWindupMode(pid.iAwMode::iAwClamp);
-    
+
+  pid_setpoint = pstorage.setpoint(); 
+  
   set_tunings();  
   
   analogWriteFreq(pwm_frequency);
@@ -94,20 +95,23 @@ float output = 0;
 }
  
 void HeaterController::inc_setpoint(int count) {
-  int new_val = (int) pid_setpoint + count;
+  int new_val = pstorage.setpoint() + count;
 
   // The temperature can be regulated between 40 and 60 degrees. 0 = disabled
-  if ((pid_setpoint == 0) && (new_val < MIN_SETPOINT) && (count > 0)) {
-    pid_setpoint = MIN_SETPOINT;    
+  if ((pstorage.setpoint() == 0) && (new_val < MIN_SETPOINT) && (count > 0)) {
+    pstorage.write_setpoint(MIN_SETPOINT);    
   } else if(new_val < MIN_SETPOINT) {
-    pid_setpoint = 0; 
+    pstorage.write_setpoint(0); 
   } else if (new_val <= MAX_SETPOINT) {
-    pid_setpoint = new_val;
-  }    
+    pstorage.write_setpoint(new_val);
+  } 
+
+  // It is necessary to keep a local copy of the setpoint because the PID library uses it as a reference.
+  pid_setpoint = pstorage.setpoint();   
 }
 
 int HeaterController::get_setpoint(void) {
-  return ((_mode == MODE_RUN_TUNE) ? tune_setpoint : pid_setpoint);
+  return pstorage.setpoint();
 }
 
 int HeaterController::get_mode(void) {
@@ -115,27 +119,31 @@ int HeaterController::get_mode(void) {
 }
 
 void HeaterController::set_mode(int new_mode) {
+  _mode = new_mode;
+}
+
+void HeaterController::start(void) {
+  if (_mode == MODE_RUN_TUNE) {
+    tune_status = ST_INITIALICE; 
+    pid_status = ST_DISABLED; 
+  } else if (_mode == MODE_RUN_PID) {
+    pid_status = ST_INITIALICE;
+    tune_status = ST_DISABLED;
+  }
+}
+
+void HeaterController::stop(void) {
   /* 
    *  If the mode is to stop the heater, it turns off the fan and the PWM output. 
    *  Initializes the PID or Tuner when the previous mode is different from the current one.
    */
-  if (new_mode == MODE_STOP) {
-    pid_setpoint = 0;
-    fan_cooler(OUT_OFF);
-    pwm(OUT_OFF);
-    pid_status = ST_DISABLED;
-    tune_status = ST_DISABLED;
-  }
-  
-  if ((new_mode == MODE_RUN_TUNE) && (_mode != MODE_RUN_TUNE)) {
-    tune_status = ST_INITIALICE;  
-  } else if ((new_mode == MODE_RUN_PID) && (_mode != MODE_RUN_PID)) {
-    pid_status = ST_INITIALICE;
-  }
-
-  _mode = new_mode;
+  fan_cooler(OUT_OFF);
+  pwm(OUT_OFF);
+  pid_status = ST_DISABLED;
+  tune_status = ST_DISABLED;
+  _mode == MODE_STOP;
 }
-    
+
 void HeaterController::pwm(int output) {
   analogWrite(HOT_BED_LEFT_PIN, output);
   analogWrite(HOT_BED_RIGHT_PIN, output);
@@ -191,7 +199,6 @@ float HeaterController::tune_controller(float input) {
     pid.SetMode(pid.Control::manual);
     pid_output = 0;   
     fan_cooler(OUT_ON); 
-    pid_setpoint = 0;
 
     tuner.Reset();
     tune_samples_count = 0;
@@ -211,7 +218,7 @@ float HeaterController::tune_controller(float input) {
         pstorage.write_pid_const(kp, ki, kd);
         pstorage.save();
         set_tunings(); 
-        set_mode(MODE_STOP); 
+        stop(); 
       break;
     } 
   }

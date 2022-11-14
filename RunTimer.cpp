@@ -25,8 +25,8 @@
  */ 
 #include "RunTimer.h"
 
-
-RunTimer::RunTimer(unsigned long max_time) {
+RunTimer::RunTimer(unsigned long max_time, ParamStorage& storage) :
+                  pstorage(storage) {
   max_inc = max_time;
 
   reset();
@@ -44,7 +44,7 @@ time_t s = 0;
 bool ret_val = false;
 
   if (start_time > 0) {
-    long time_left_ms = ((set_time * 3600000) - (now - start_time));
+    long time_left_ms = ((pstorage.get_time() * 3600000) - (now - start_time));
     
     ret_val = (time_left_ms <= 0);
     
@@ -59,15 +59,15 @@ bool ret_val = false;
 }
 
 void RunTimer::inc_time(int count) {
-  int new_val = set_time + count;
+  int new_val = pstorage.get_time() + count;
   
   if ((new_val >= 0) && (new_val <= max_inc)) {
-    set_time = new_val;
+    pstorage.write_time(new_val);
   } 
 }
     
 int RunTimer::get_time(void) {
-  return set_time;
+  return pstorage.get_time();
 }
 
 void RunTimer::start() {
@@ -76,7 +76,6 @@ void RunTimer::start() {
 
 void RunTimer::reset() {
   start_time = 0;
-  set_time = 0;
   time_t s = 0;
   tm = localtime(&s);
 }

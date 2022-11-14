@@ -53,82 +53,68 @@
 
 uint8_t           refresh_display = 10;
 unsigned long     splash_timer;
-bool              factory_reset;
+bool              factory_reset = false;
 
-ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT);
+ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT,
+                                SETPOINT_DEFAULT, TIME_DEFAULT);
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS, param_storage);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP, param_storage);
-RunTimer          timer(MAX_HOURS);
+RunTimer          timer(MAX_HOURS, param_storage);
 UserInterface     ui(menu_list, sizeof(menu_list));
-   
+
+void bool_selection(char* str_buff, bool value) {
+  if (value) {
+    sprintf(str_buff, "ON");
+  } else {
+    sprintf(str_buff, "OFF");
+  } 
+}
+  
 /*
  * Callback function that invokes the UI when it needs to update the 
  * parameters of each configuration menu item.
  */
-char* callback_menu_get(char* value, int item_id) {
+char* callback_menu_get(char* str_buff, int item_id) {
   switch (item_id) {
-      case MNU_BOX_TEMP_ID:
-        sprintf(value, "%d", heater.get_setpoint());
-      break;
-      case MNU_REMAINING_TIME_ID:
-        sprintf(value, "%d", timer.get_time());
-      break;
-      case MNU_TUNE_ENABLE_ID:
-        if (heater.get_mode() == MODE_RUN_TUNE) {
-          sprintf(value, "ON");
-        } else {
-          sprintf(value, "OFF");
-        }
-      break;
-      case MNU_THERMISTORS_ID:
-        sprintf(value, "%d", sensors.get_therms());
-      break;
-      case MNU_HEATER_TEMP_ID:
-        sprintf(value, "%02.0f", max(sensors.bed_left_celcius(), sensors.bed_right_celcius()));
-      break;
-      case MNU_KP_ID:
-        sprintf(value, "%2.2f", param_storage.kp());
-      break;
-      case MNU_KI_ID:
-        sprintf(value, "%2.2f", param_storage.ki());
-      break;
-      case MNU_KD_ID:
-        sprintf(value, "%2.2f", param_storage.kd());
-      break;
-      case MNU_FACTORY_RESET_ID:
-        if (factory_reset) {
-          sprintf(value, "ON");
-        } else {
-          sprintf(value, "OFF");
-        }
-      break;
-      case MNU_FIRMWARE_VERSION_ID:
-        sprintf(value, "%s", FIRMWARE_VERSION);
-      break;
-      default:
-        sprintf(value, "--");
-      break;
-    }
+    case MNU_TURN_ENABLE_ID:
+      bool_selection(str_buff, heater.get_mode() == MODE_RUN_PID);
+    break;
+    case MNU_BOX_TEMP_ID:
+      sprintf(str_buff, "%d", heater.get_setpoint());
+    break;
+    case MNU_REMAINING_TIME_ID:
+      sprintf(str_buff, "%d", timer.get_time());
+    break;
+    case MNU_TUNE_ENABLE_ID:
+      bool_selection(str_buff, heater.get_mode() == MODE_RUN_TUNE);
+    break;
+    case MNU_THERMISTORS_ID:
+      sprintf(str_buff, "%d", sensors.get_therms());
+    break;
+    case MNU_HEATER_TEMP_ID:
+      sprintf(str_buff, "%02.0f", max(sensors.bed_left_celcius(), sensors.bed_right_celcius()));
+    break;
+    case MNU_KP_ID:
+      sprintf(str_buff, "%2.2f", param_storage.kp());
+    break;
+    case MNU_KI_ID:
+      sprintf(str_buff, "%2.2f", param_storage.ki());
+    break;
+    case MNU_KD_ID:
+      sprintf(str_buff, "%2.2f", param_storage.kd());
+    break;
+    case MNU_FACTORY_RESET_ID:
+      bool_selection(str_buff, factory_reset);
+    break;
+    case MNU_FIRMWARE_VERSION_ID:
+      sprintf(str_buff, "%s", FIRMWARE_VERSION);
+    break;
+    default:
+      sprintf(str_buff, "--");
+    break;
+  }
 
-    return value;
-}
-
-/*
- * Check if it is necessary to go to PID run mode
- */
-void check_if_start_pid(void) {
-  if ((heater.get_setpoint() > 0) && (timer.get_time() > 0)) {
-    if (heater.get_mode() == MODE_RUN_TUNE) {
-      // In tuner mode, the set point is fixed at 50 degrees. And when it goes into 
-      // stop mode, it resets to zero, so you have to save it for later use.
-      int setpoint = heater.get_setpoint();
-      heater.set_mode(MODE_STOP);  
-      heater.inc_setpoint(setpoint);
-    } 
-    
-    heater.set_mode(MODE_RUN_PID);
-    timer.start();
-  }   
+  return str_buff;
 }
 
 /*
@@ -136,7 +122,27 @@ void check_if_start_pid(void) {
  */
 void callback_menu_end_edit(int item_id) {
   switch (item_id) {
+    case MNU_TURN_ENABLE_ID:
+      if (heater.get_mode() == MODE_RUN_PID) {
+        timer.start();
+        heater.start();
+      } else if (heater.get_mode() == MODE_STOP) {
+        timer.reset();
+        heater.stop();
+      }
+    break;
+    case MNU_TUNE_ENABLE_ID: 
+      if ((heater.get_mode() == MODE_RUN_TUNE)) {
+        timer.reset();
+        heater.start();
+      } else if (heater.get_mode() == MODE_STOP) {
+        timer.reset();
+        heater.stop();
+      }
+    break;
     case MNU_THERMISTORS_ID:
+    case MNU_BOX_TEMP_ID:
+    case MNU_REMAINING_TIME_ID:
       param_storage.save();
     break;
     case MNU_FACTORY_RESET_ID:
@@ -146,6 +152,8 @@ void callback_menu_end_edit(int item_id) {
         heater.set_mode(MODE_STOP);
         param_storage.write_pid_const(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT);
         param_storage.write_therms(THERMS_DEFAULT);
+        param_storage.write_setpoint(SETPOINT_DEFAULT);
+        param_storage.write_time(TIME_DEFAULT);
         param_storage.save();  
         heater.set_tunings();
       }
@@ -158,13 +166,6 @@ void callback_menu_end_edit(int item_id) {
  */
 void callback_menu_exit(int item_id) {
   refresh_display = 10;
-  
-  if (heater.get_mode() == MODE_RUN_TUNE) { 
-    if ((heater.get_setpoint() == 0) || (timer.get_time() == 0)) {
-      heater.set_mode(MODE_STOP);
-      timer.reset();
-    }
-  }
 }
 
 /*
@@ -173,17 +174,19 @@ void callback_menu_exit(int item_id) {
  */
 bool callback_menu_set(int value, int item_id) {
   switch (item_id) {
+    case MNU_TURN_ENABLE_ID:
+      if ((heater.get_setpoint() > 0) && (timer.get_time() > 0)) {
+        heater.set_mode((value > 0) ? MODE_RUN_PID : MODE_STOP);
+      } 
+    break;
     case MNU_BOX_TEMP_ID: 
       heater.inc_setpoint(value);
-      check_if_start_pid();
     break;
     case MNU_REMAINING_TIME_ID:
       timer.inc_time(value);
-      check_if_start_pid();
     break;
     case MNU_TUNE_ENABLE_ID: 
       heater.set_mode((value > 0) ? MODE_RUN_TUNE : MODE_STOP);
-      timer.reset();
     break;
     case MNU_THERMISTORS_ID:
       sensors.set_therms(value);
@@ -235,7 +238,8 @@ char buff[100];
   ui.display.setTextColor(WHITE);             
   
   ui.display.setCursor(22, 0);   
-  sprintf(buff, "%02.0f/%02d C", sensors.box_celcius(), heater.get_setpoint());
+  int setpoint = (heater.get_mode() == MODE_STOP) ? 0 : heater.get_setpoint();
+  sprintf(buff, "%02.0f/%02d C", sensors.box_celcius(), setpoint);
   ui.display.print(buff);
 
   if (heater.get_mode() == MODE_RUN_TUNE) {
@@ -328,7 +332,7 @@ void loop() {
   
   // when the timer in hours expires, it stops the heater.
   if (timer.update()) {
-    heater.set_mode(MODE_STOP);
+    heater.stop();
     timer.reset();
   }
   

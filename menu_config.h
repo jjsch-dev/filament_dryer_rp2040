@@ -27,19 +27,21 @@
 #include "UserInterface.h"
 
 #define MNU_EXIT_ID                 0
-#define MNU_BOX_TEMP_ID             1
-#define MNU_REMAINING_TIME_ID       2
-#define MNU_TUNE_ENABLE_ID          3
-#define MNU_THERMISTORS_ID          4
-#define MNU_HEATER_TEMP_ID          5
-#define MNU_KP_ID                   6
-#define MNU_KI_ID                   7
-#define MNU_KD_ID                   8
-#define MNU_FACTORY_RESET_ID        9
-#define MNU_FIRMWARE_VERSION_ID     10
+#define MNU_TURN_ENABLE_ID          1
+#define MNU_BOX_TEMP_ID             2
+#define MNU_REMAINING_TIME_ID       3
+#define MNU_TUNE_ENABLE_ID          4
+#define MNU_THERMISTORS_ID          5
+#define MNU_HEATER_TEMP_ID          6
+#define MNU_KP_ID                   7
+#define MNU_KI_ID                   8
+#define MNU_KD_ID                   9
+#define MNU_FACTORY_RESET_ID        10
+#define MNU_FIRMWARE_VERSION_ID     11
 
 menu_item_t menu_list[] = {
-  {"Exit",    MENU_MODE_EXIT, 80}, 
+  {"Exit",    MENU_MODE_EXIT, 80},
+  {"Turn:",   MENU_MODE_EDIT, 80},  
   {"Temp:",   MENU_MODE_EDIT, 80}, 
   {"Time:",   MENU_MODE_EDIT, 80}, 
   {"Tune:",   MENU_MODE_EDIT, 80},

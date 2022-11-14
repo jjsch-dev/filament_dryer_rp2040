@@ -56,6 +56,7 @@
 
 #define MIN_SETPOINT            40      // Minimum Box temperature. 
 #define MAX_SETPOINT            60      // Maximun Box temperature.
+#define SETPOINT_DEFAULT        50
 
 class HeaterController 
 {
@@ -69,6 +70,8 @@ public:
   int get_setpoint(void);
   int get_mode(void);
   void set_mode(int mode);
+  void start();
+  void stop();
   int tuning_percentage(void );
   void set_tunings(void);
     

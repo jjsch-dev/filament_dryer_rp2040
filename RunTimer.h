@@ -28,10 +28,14 @@
 #include <time.h>
 #include "Arduino.h"
 
+#include "ParamStorage.h"
+
+#define TIME_DEFAULT 6
+
 class RunTimer 
 {
 public:
-  RunTimer(unsigned long max_time);
+  RunTimer(unsigned long max_time, ParamStorage& storage);
   ~RunTimer() {};
 
   bool update();
@@ -45,7 +49,7 @@ public:
   char* ascii_time(void);
     
 private:
-  int             set_time;  
+  ParamStorage&   pstorage;
   unsigned long   start_time; 
   unsigned long   max_inc;
   struct tm*      tm;

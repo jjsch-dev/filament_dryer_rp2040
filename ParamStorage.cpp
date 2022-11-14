@@ -27,11 +27,13 @@
 #include <EEPROM.h>
 #include "ParamStorage.h"
 
-ParamStorage::ParamStorage(float kp, float ki, float kd, int therms) {
+ParamStorage::ParamStorage(float kp, float ki, float kd, int therms, int setpoint, int hours) {
   _kp = kp;
   _ki = ki;
   _kd = kd;
   _therms = therms;
+  _setpoint = setpoint;
+  _time = hours;
 }
 
 bool ParamStorage::begin(void) {
@@ -42,6 +44,8 @@ bool ParamStorage::begin(void) {
     read_ki();
     read_kd();
     read_therms();
+    read_setpoint();
+    read_time();
     return true;
   } 
   
@@ -74,6 +78,14 @@ int ParamStorage::therms(void) {
   return _therms;
 }
 
+int ParamStorage::setpoint(void) {
+  return _setpoint;
+}
+
+int ParamStorage::get_time(void) {
+  return _time;
+}
+  
 float ParamStorage::read_kp(void) {
   EEPROM.get(ADDRESS_KP, _kp);
   return _kp;
@@ -94,6 +106,16 @@ int ParamStorage::read_therms(void) {
   return _therms;
 }
 
+int ParamStorage::read_setpoint(void) {
+  EEPROM.get(ADDRESS_SETPOINT, _setpoint);
+  return _setpoint;
+}
+
+int ParamStorage::read_time(void) {
+  EEPROM.get(ADDRESS_TIME, _time);
+  return _time;
+}
+  
 void ParamStorage::write_pid_const(float kp, float ki, float kd) {
   _kp = kp;
   _ki = ki;
@@ -108,6 +130,16 @@ void ParamStorage::write_therms(int therms) {
   EEPROM.put(ADDRESS_THERMS, _therms);
 }
 
+void ParamStorage::write_setpoint(int temp) {
+  _setpoint = temp;
+  EEPROM.put(ADDRESS_SETPOINT, _setpoint);
+}
+
+void ParamStorage::write_time(int hours) {
+  _time = hours;
+  EEPROM.put(ADDRESS_TIME, _time);
+}
+  
 /*
  * Since the eeprom is a simulated module in the RP2040 on Arduino, 
  * the library's put only write the RAM buffer allocated with begin. 

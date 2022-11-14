@@ -100,7 +100,7 @@ unsigned long now = millis();
         sensor_id = 0;
     }
 
-    if (sensor_id == pstorage.therms()) {
+    if (sensor_id > pstorage.therms()) {
       sensor_id = 0;  
     } 
     
@@ -111,19 +111,19 @@ unsigned long now = millis();
 }
 
 float TempSensors::box_celcius(void) {
-    return box_temp;  
+  return box_temp;  
 }
 
 float TempSensors::box_humidity(void) {
-    return humidity;
+  return humidity;
 }
 
 float TempSensors::bed_left_celcius(void) {
-    return (pstorage.therms() > 0) ? bed_left_temp : 0;
+  return (pstorage.therms() > 0) ? bed_left_temp : 0;
 }
 
 float TempSensors::bed_right_celcius(void) {
-    return (pstorage.therms() == 2) ? bed_right_temp : 0; 
+  return (pstorage.therms() == 2) ? bed_right_temp : 0; 
 }
 
 void TempSensors::set_therms(int count) {

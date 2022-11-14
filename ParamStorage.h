@@ -32,11 +32,13 @@
 #define ADDRESS_KI          ADDRESS_KP + sizeof(float)
 #define ADDRESS_KD          ADDRESS_KI + sizeof(float) 
 #define ADDRESS_THERMS      ADDRESS_KD + sizeof(float) 
+#define ADDRESS_SETPOINT    ADDRESS_THERMS + sizeof(int)
+#define ADDRESS_TIME        ADDRESS_SETPOINT + sizeof(int)
 
 class ParamStorage  
 {
 public:
-  ParamStorage(float kp, float ki, float kd, int therms);
+  ParamStorage(float kp, float ki, float kd, int therms, int setpoint, int hours);
   ~ParamStorage() {};
   
   bool begin();
@@ -44,14 +46,20 @@ public:
   float ki(void);
   float kd(void);
   int   therms(void);
+  int   setpoint(void);
+  int   get_time(void);
   
   float read_kp(void);
   float read_ki(void);
   float read_kd(void);
   int   read_therms(void);
+  int   read_setpoint(void);
+  int   read_time(void);
   
   void write_pid_const(float kp, float ki, float kd);
   void write_therms(int therms);
+  void write_setpoint(int temp);
+  void write_time(int hours);
   void save(void);
   
 private:
@@ -62,5 +70,7 @@ private:
   float _ki;
   float _kd; 
   int _therms;
+  int _setpoint;
+  int _time;
   int magic_number;
 };
