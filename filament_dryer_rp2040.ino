@@ -31,7 +31,7 @@
 #include "menu_config.h"
 #include "ParamStorage.h"
 
-#define FIRMWARE_VERSION      "0.1.0"   // Version actual del firmware.
+#define FIRMWARE_VERSION      "1.0.0"   // Version actual del firmware.
 
 #define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 

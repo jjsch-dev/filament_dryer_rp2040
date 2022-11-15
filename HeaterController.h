@@ -107,6 +107,8 @@ private:
   float     tune_output;
   float     tune_setpoint;
 
+  int       pid_sample_timeout;
+  
 private:
   float pid_controller(float box_temp, float bed_temp);
   float tune_controller(float input, float bed_temp);

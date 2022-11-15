@@ -37,7 +37,7 @@ HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed, Par
   max_bed_temp = max_bed;
   
   tune_settle_time_sec = 10;
-  tune_test_time_sec = 500;     // runPid interval = testTimeSec / samples
+  tune_test_time_sec = 250;     // runPid interval = testTimeSec / samples (500 mS)
   tune_samples = 500;
   tune_input_span = 60;
   tune_output_span = pwm_res; 
@@ -52,6 +52,9 @@ HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed, Par
   tune_input = 0;
   tune_output = 0;
   tune_setpoint = 50;
+
+  // The sample time of the PID has to match that of the tuner, and uses uS as the unit.
+  pid_sample_timeout = (tune_test_time_sec * 1000000) / tune_samples;
 }
 
 bool HeaterController::begin(void) {
@@ -59,7 +62,7 @@ bool HeaterController::begin(void) {
                   tune_output_step, tune_test_time_sec, tune_settle_time_sec, tune_samples);
   tuner.SetEmergencyStop(tune_temp_limit);
   
-  pid.SetSampleTimeUs(200000); // 200 mS en uS
+  pid.SetSampleTimeUs(pid_sample_timeout); // 500 mS en uS
   pid.SetOutputLimits(0, pwm_resolution);
 
   pid.SetProportionalMode(pid.pMode::pOnMeas);
@@ -107,7 +110,7 @@ void HeaterController::inc_setpoint(int count) {
   } 
 
   // It is necessary to keep a local copy of the setpoint because the PID library uses it as a reference.
-  pid_setpoint = pstorage.setpoint();   
+  pid_setpoint = pstorage.setpoint(); 
 }
 
 int HeaterController::get_setpoint(void) {
@@ -158,7 +161,7 @@ void  HeaterController::fan_cooler(int output) {
 
 float HeaterController::pid_controller(float box_temp, float bed_temp) {
   pid_input = box_temp;
-
+  
   switch (pid_status) {
     case ST_DISABLED:
       pid.SetMode(pid.Control::manual);
