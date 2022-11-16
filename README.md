@@ -21,13 +21,13 @@ The [HTU21D](https://github.com/devxplained/HTU21D-Sensor-Library) library is us
 As the box is printed in Petg, it is not convenient for the heated bed to exceed 80 degrees, two 100 KHOM thermistors are used in conjunction with the library [thermistor](https://github.com/miguel5612/ThermistorLibrary) that is a porting of the reprap firmware.
 
 User Interfase
-______________
+--------------
 The user interface is based on a 0.96-inch screen for presentation and a rotary encoder for input.
 To control the display via I2C the [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306) library is used, and for the rotary encoder the [EncoderButton]() library, which depends on the [Encoder library](https://www.pjrc.com/teensy/td_libs_Encoder.html) and [Bounce2 library](https://github.com/thomasfredericks/Bounce2) libraries.
 
 The User Interface class uses these libraries to iterate a list of items that make up the configuration menu, and with callback functions (get/set/edit/end edit/exit) it communicates with the application.
 
 Heater
-______
+------
 To heat the box, two beds are used as heating elements with two 15A mofsets that regulate the power with PWM channels.
 To homogenize the environment of the box, a 30x30 mm fan cooler is used that for now turns on at 100%.
