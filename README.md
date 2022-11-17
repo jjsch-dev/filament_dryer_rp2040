@@ -31,3 +31,7 @@ Heater
 ------
 To heat the box, two beds are used as heating elements with two 15A mofsets that regulate the power with PWM channels.
 To homogenize the environment of the box, a 30x30 mm fan cooler is used that for now turns on at 100%.
+
+Schematic
+---------
+![alt text](images/filament_dryer_bb.png)
