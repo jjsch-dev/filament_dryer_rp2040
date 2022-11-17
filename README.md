@@ -35,3 +35,6 @@ To homogenize the environment of the box, a 30x30 mm fan cooler is used that for
 Schematic
 ---------
 ![alt text](images/filament_dryer_bb.png)
+
+![alt text](images/filament_dryer_schem.png)
+
