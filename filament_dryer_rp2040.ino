@@ -30,8 +30,9 @@
 #include "RunTimer.h"
 #include "menu_config.h"
 #include "ParamStorage.h"
+#include "Odometer.h"
 
-#define FIRMWARE_VERSION      "1.0.0"   // Version actual del firmware.
+#define FIRMWARE_VERSION      "1.0.1"   // Version actual del firmware.
 
 #define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 
@@ -61,6 +62,7 @@ TempSensors       sensors(SAMPLE_TIMEOUT_100MS, param_storage);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP, param_storage);
 RunTimer          timer(MAX_HOURS, param_storage);
 UserInterface     ui(menu_list, sizeof(menu_list));
+Odometer          odometer(TCRT5000_D0_PIN);
 
 void bool_selection(char* str_buff, bool value) {
   if (value) {
@@ -321,7 +323,8 @@ void setup() {
            callback_menu_end_edit, callback_menu_exit);
   sensors.begin();
   heater.begin();
-
+  odometer.begin();
+  
   splash_timer = millis();
 }
 
@@ -362,7 +365,8 @@ void loop() {
        * Use the Arduino Plotter to plot the system response.
        * Note: The output is converted to percentage.
        */
-      plot_pid(pwm_val, bed_temp);
+      //plot_pid(pwm_val, bed_temp);
+      Serial.print("Odometer counter : "); Serial.println(odometer.get_counter());
     }
   }
 }
