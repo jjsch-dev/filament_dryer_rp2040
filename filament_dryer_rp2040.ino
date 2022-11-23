@@ -260,7 +260,7 @@ void callback_odom_start(void) {
 }
 
 /*
- * It turns off the PID when it detects that the filament spool has not 
+ * Turn off the PID when detects that the filament spool has not 
  * moved for the programmed time. 
  * As long as the PID has reached the programmed temperature.
  */
@@ -268,7 +268,13 @@ void callback_odom_stop(void) {
   if (heater.setpoint_reached()) {
     timer.reset();
     heater.stop();
-  }  
+  } else {
+    /*
+     * Resets the shutdown timer to prevent the stop callback from 
+     * continuously firing while the desired temperature is reached.
+     */
+    odometer.reset_timer();  
+  }
 }
 
 /*
