@@ -1,7 +1,6 @@
 /**
- * Encapsulates the temperature and humidity sensors.  
- * One read at a time is performed to optimize the time the CPU 
- * hangs while performing the read.
+ * Turns counter of the roller where the filament spool rests, depending on 
+ * the configuration it can be used to turn the heater on and off.
  * 
  * MIT License
  * 
@@ -32,7 +31,8 @@ static void isr_data() {
   p_instance->handle_isr();
 } 
   
-Odometer::Odometer(int pin) {
+Odometer::Odometer(int pin, ParamStorage& storage) :
+          pstorage(storage) {
   counter = 0;
   do_pin = pin;
   p_instance = this;
@@ -46,6 +46,18 @@ bool Odometer::begin() {
 
 bool Odometer::update() {
   return true;
+}
+
+int Odometer::ge_mode() {
+  return pstorage.odom_mode();  
+}
+
+void Odometer::set_mode(int value) {
+  int new_val = pstorage.odom_mode() + value;
+  
+  if ((new_val >= ODOM_MODE_DISABLED) && (new_val <= ODOM_MODE_BOTH)) {
+    pstorage.write_odom_mode(new_val);
+  }   
 }
 
 int Odometer::get_counter() {

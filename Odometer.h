@@ -1,7 +1,6 @@
 /**
- * Encapsulates the temperature and humidity sensors.  
- * One read at a time is performed to optimize the time the CPU 
- * hangs while performing the read.
+ * Turns counter of the roller where the filament spool rests, depending on 
+ * the configuration it can be used to turn the heater on and off.
  * 
  * MIT License
  * 
@@ -27,22 +26,33 @@
 #pragma once
 
 #include "Arduino.h"
+#include "ParamStorage.h"
 
 #define TCRT5000_D0_PIN         14  // GPIO14
+
+#define ODOM_MODE_DISABLED      0
+#define ODOM_MODE_START         1
+#define ODOM_MODE_STOP          2
+#define ODOM_MODE_BOTH          3
+#define ODOM_MODE_DEFAULT       ODOM_MODE_DISABLED
 
 class Odometer  
 {
 public:
-  Odometer(int pin);
+  Odometer(int pin, ParamStorage& storage);
   ~Odometer() {};
 
   bool begin();
   bool update();
   int get_counter();  
-  
+  int ge_mode();
+  void set_mode(int value);
+
+public:  
   void handle_isr();
 
 private:
+  ParamStorage& pstorage;
   volatile int counter;
   
   int do_pin;

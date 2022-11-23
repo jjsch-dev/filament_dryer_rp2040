@@ -57,12 +57,12 @@ unsigned long     splash_timer;
 bool              factory_reset = false;
 
 ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT,
-                                SETPOINT_DEFAULT, TIME_DEFAULT);
+                                SETPOINT_DEFAULT, TIME_DEFAULT, ODOM_MODE_DEFAULT);
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS, param_storage);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP, param_storage);
 RunTimer          timer(MAX_HOURS, param_storage);
 UserInterface     ui(menu_list, sizeof(menu_list));
-Odometer          odometer(TCRT5000_D0_PIN);
+Odometer          odometer(TCRT5000_D0_PIN, param_storage);
 
 void bool_selection(char* str_buff, bool value) {
   if (value) {
@@ -70,6 +70,29 @@ void bool_selection(char* str_buff, bool value) {
   } else {
     sprintf(str_buff, "OFF");
   } 
+}
+
+void odom_mode_sel(char* str_buff, int mode) {
+  switch (mode) {
+    case ODOM_MODE_DISABLED:
+      sprintf(str_buff, "OFF");
+    break;
+
+    case ODOM_MODE_START:
+      sprintf(str_buff, "STAR");
+    break;
+
+    case ODOM_MODE_STOP:
+      sprintf(str_buff, "STOP");
+    break;
+    
+    case ODOM_MODE_BOTH:
+      sprintf(str_buff, "BOTH");
+    break;
+
+    default:
+      sprintf(str_buff, "-");
+  }
 }
   
 /*
@@ -95,6 +118,9 @@ char* callback_menu_get(char* str_buff, int item_id) {
     break;
     case MNU_HEATER_TEMP_ID:
       sprintf(str_buff, "%02.0f", max(sensors.bed_left_celcius(), sensors.bed_right_celcius()));
+    break;
+    case MNU_ODOM_MODE_ID:
+      odom_mode_sel(str_buff, odometer.ge_mode());
     break;
     case MNU_KP_ID:
       sprintf(str_buff, "%2.2f", param_storage.kp());
@@ -145,6 +171,7 @@ void callback_menu_end_edit(int item_id) {
     case MNU_THERMISTORS_ID:
     case MNU_BOX_TEMP_ID:
     case MNU_REMAINING_TIME_ID:
+    case MNU_ODOM_MODE_ID:
       param_storage.save();
     break;
     case MNU_FACTORY_RESET_ID:
@@ -156,6 +183,7 @@ void callback_menu_end_edit(int item_id) {
         param_storage.write_therms(THERMS_DEFAULT);
         param_storage.write_setpoint(SETPOINT_DEFAULT);
         param_storage.write_time(TIME_DEFAULT);
+        param_storage.write_odom_mode(ODOM_MODE_DEFAULT);
         param_storage.save();  
         heater.set_tunings();
       }
@@ -195,6 +223,10 @@ bool callback_menu_set(int value, int item_id) {
     break;
     case MNU_FACTORY_RESET_ID:
       factory_reset = (value > 0) ? true : false;
+    break;
+    case MNU_ODOM_MODE_ID: 
+      odometer.set_mode(value);
+    break;
     default:
       return false;
   }

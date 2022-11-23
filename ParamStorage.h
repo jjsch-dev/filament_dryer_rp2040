@@ -34,11 +34,12 @@
 #define ADDRESS_THERMS      ADDRESS_KD + sizeof(float) 
 #define ADDRESS_SETPOINT    ADDRESS_THERMS + sizeof(int)
 #define ADDRESS_TIME        ADDRESS_SETPOINT + sizeof(int)
+#define ADDRESS_ODOM_MODE   ADDRESS_TIME + sizeof(int)
 
 class ParamStorage  
 {
 public:
-  ParamStorage(float kp, float ki, float kd, int therms, int setpoint, int hours);
+  ParamStorage(float kp, float ki, float kd, int therms, int setpoint, int hours, int mode);
   ~ParamStorage() {};
   
   bool begin();
@@ -48,6 +49,7 @@ public:
   int   therms(void);
   int   setpoint(void);
   int   get_time(void);
+  int   odom_mode(void);
   
   float read_kp(void);
   float read_ki(void);
@@ -55,11 +57,13 @@ public:
   int   read_therms(void);
   int   read_setpoint(void);
   int   read_time(void);
+  int   read_odom_mode(void);
   
   void write_pid_const(float kp, float ki, float kd);
   void write_therms(int therms);
   void write_setpoint(int temp);
   void write_time(int hours);
+  void write_odom_mode(int mode);
   void save(void);
   
 private:
@@ -72,5 +76,6 @@ private:
   int _therms;
   int _setpoint;
   int _time;
+  int _odom_mode;
   int magic_number;
 };

@@ -33,11 +33,12 @@
 #define MNU_TUNE_ENABLE_ID          4
 #define MNU_THERMISTORS_ID          5
 #define MNU_HEATER_TEMP_ID          6
-#define MNU_KP_ID                   7
-#define MNU_KI_ID                   8
-#define MNU_KD_ID                   9
-#define MNU_FACTORY_RESET_ID        10
-#define MNU_FIRMWARE_VERSION_ID     11
+#define MNU_ODOM_MODE_ID            7
+#define MNU_KP_ID                   8
+#define MNU_KI_ID                   9
+#define MNU_KD_ID                   10
+#define MNU_FACTORY_RESET_ID        11
+#define MNU_FIRMWARE_VERSION_ID     12
 
 menu_item_t menu_list[] = {
   {"Exit",    MENU_MODE_EXIT, 80},
@@ -47,6 +48,7 @@ menu_item_t menu_list[] = {
   {"Tune:",   MENU_MODE_EDIT, 80},
   {"Therm:",  MENU_MODE_EDIT, 90},
   {"Heat:",   MENU_MODE_INFO, 80},
+  {"Odo:",    MENU_MODE_EDIT, 70},
   {"Kp:",     MENU_MODE_INFO, 60},
   {"Ki:",     MENU_MODE_INFO, 60},
   {"Kd:",     MENU_MODE_INFO, 60},
