@@ -27,14 +27,18 @@
 #include <EEPROM.h>
 #include "ParamStorage.h"
 
-ParamStorage::ParamStorage(float kp, float ki, float kd, int therms, int setpoint, int hours, int mode) {
+ParamStorage::ParamStorage(float kp, float ki, float kd, int therms, 
+                           int setpoint, int hours, int odom_mode, 
+                           int odom_minutes, int odom_turns) {
   _kp = kp;
   _ki = ki;
   _kd = kd;
   _therms = therms;
   _setpoint = setpoint;
   _time = hours;
-  _odom_mode = mode;
+  _odom_mode = odom_mode;
+  _odom_minutes = odom_minutes;
+  _odom_turns = odom_turns;
 }
 
 bool ParamStorage::begin(void) {
@@ -48,6 +52,8 @@ bool ParamStorage::begin(void) {
     read_setpoint();
     read_time();
     read_odom_mode();
+    read_odom_minutes();
+    read_odom_turns();
     return true;
   } 
   
@@ -91,7 +97,15 @@ int ParamStorage::get_time(void) {
 int ParamStorage::odom_mode(void) {
   return _odom_mode;
 }
-    
+
+int ParamStorage::odom_minutes(void) {
+  return _odom_minutes;
+}
+
+int ParamStorage::odom_turns(void) {
+  return _odom_turns;
+}
+
 float ParamStorage::read_kp(void) {
   EEPROM.get(ADDRESS_KP, _kp);
   return _kp;
@@ -126,6 +140,16 @@ int ParamStorage::read_odom_mode(void) {
   EEPROM.get(ADDRESS_ODOM_MODE, _odom_mode);
   return _odom_mode;
 }
+
+int ParamStorage::read_odom_minutes(void) {
+  EEPROM.get(ADDRESS_ODOM_MINUTES, _odom_minutes);
+  return _odom_minutes;
+}
+
+int ParamStorage::read_odom_turns(void) {
+  EEPROM.get(ADDRESS_ODOM_MINUTES, _odom_turns);
+  return _odom_turns;
+}
   
 void ParamStorage::write_pid_const(float kp, float ki, float kd) {
   _kp = kp;
@@ -154,6 +178,16 @@ void ParamStorage::write_time(int hours) {
 void ParamStorage::write_odom_mode(int mode) {
   _odom_mode = mode;
   EEPROM.put(ADDRESS_ODOM_MODE, _odom_mode);
+}
+
+void ParamStorage::write_odom_minutes(int minutes) {
+  _odom_minutes = minutes;
+  EEPROM.put(ADDRESS_ODOM_MINUTES, _odom_minutes);
+}
+
+void ParamStorage::write_odom_turns(int turns) {
+  _odom_turns = turns;
+  EEPROM.put(ADDRESS_ODOM_TURNS, _odom_turns);
 }
 
 /*

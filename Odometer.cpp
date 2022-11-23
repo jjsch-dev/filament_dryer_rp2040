@@ -33,22 +33,63 @@ static void isr_data() {
   
 Odometer::Odometer(int pin, ParamStorage& storage) :
           pstorage(storage) {
-  counter = 0;
+  last_turns = 0;
+  heater_on = false;
   do_pin = pin;
   p_instance = this;
+  time_turns_update = 0;
 }
 
-bool Odometer::begin() {
+bool Odometer::begin(callback_odom_start_t c_start, callback_odom_stop_t c_stop) {
   attachInterrupt(do_pin, isr_data, FALLING);
 
+  odom_start = c_start;
+  odom_stop = c_stop;
+  last_turns = get_turns();
+  time_turns_update = millis();
   return true;
 }
 
-bool Odometer::update() {
+void Odometer::start_timer(void) {
+  start_time = millis();
+}
+
+bool Odometer::update(bool pid_on) {
+unsigned long now = millis(); 
+
+  if ((pstorage.odom_mode() == ODOM_MODE_START) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
+    if (!pid_on && (last_turns < get_turns())) {
+      odom_start();    
+    }
+  } 
+  
+  if ((pstorage.odom_mode() == ODOM_MODE_STOP) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
+    if (pid_on) {
+      if ((pstorage.odom_minutes() * 60000) <= (now - start_time)) {
+        odom_stop();
+      }
+    }
+  }
+
+  update_turns(now);
+
   return true;
 }
 
-int Odometer::ge_mode() {
+void Odometer::update_turns(unsigned long now) {
+  last_turns = get_turns();
+
+  /*
+   * Updates the number of laps every 10 minutes to avoid exceeding 
+   * the allowed recording cycles of the flash (approx. 10000).
+   */
+  if ((time_turns_update + 600000) < now) {
+    pstorage.save();
+    time_turns_update = now;
+  }
+}
+  
+int Odometer::get_mode() {
   return pstorage.odom_mode();  
 }
 
@@ -60,12 +101,30 @@ void Odometer::set_mode(int value) {
   }   
 }
 
-int Odometer::get_counter() {
-  return counter;
-} 
+int Odometer::get_minutes() {
+  return pstorage.odom_minutes();
+}
+
+void Odometer::set_minutes(int value) {
+  int new_val = pstorage.odom_minutes() + value;
+  
+  if ((new_val >= ODOM_MINUTES_MIN) && (new_val <= ODOM_MINUTES_MAX)) {
+    pstorage.write_odom_minutes(new_val);
+  }   
+}
+
+int Odometer::get_turns() {
+  return pstorage.odom_turns();
+}
+
+void Odometer::set_turns(int value) {
+  if (value < 0) {
+    pstorage.write_odom_turns(ODOM_TURNS_DEFAULT);
+  }   
+}
 
 void Odometer::handle_isr() {
-  counter++;
+  pstorage.write_odom_turns(pstorage.odom_turns() + 1);
 } 
 
  

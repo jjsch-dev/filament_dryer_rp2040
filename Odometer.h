@@ -36,24 +36,47 @@
 #define ODOM_MODE_BOTH          3
 #define ODOM_MODE_DEFAULT       ODOM_MODE_DISABLED
 
+#define ODOM_MINUTES_MIN        1
+#define ODOM_MINUTES_MAX        30
+#define ODOM_MINUTES_DEFAULT    2
+
+#define ODOM_TURNS_DEFAULT      0
+
+typedef void (*callback_odom_start_t)(void);
+typedef void (*callback_odom_stop_t)(void);
+
 class Odometer  
 {
 public:
   Odometer(int pin, ParamStorage& storage);
   ~Odometer() {};
 
-  bool begin();
-  bool update();
+  bool begin(callback_odom_start_t c_start, callback_odom_stop_t c_stop);
+  bool update(bool heater_on);
   int get_counter();  
-  int ge_mode();
+  int get_mode();
+  int get_minutes();
+  int get_turns();
   void set_mode(int value);
-
+  void set_minutes(int value);
+  void set_turns(int value);
+  void start_timer(void);
+  
 public:  
   void handle_isr();
 
 private:
   ParamStorage& pstorage;
   volatile int counter;
+  int last_turns; 
   
   int do_pin;
+  bool heater_on;
+  unsigned long start_time;
+  unsigned long time_turns_update;
+  
+  void update_turns(unsigned long now);
+  
+  callback_odom_stop_t  odom_stop;
+  callback_odom_start_t odom_start;
 };

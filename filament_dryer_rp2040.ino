@@ -57,7 +57,8 @@ unsigned long     splash_timer;
 bool              factory_reset = false;
 
 ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT,
-                                SETPOINT_DEFAULT, TIME_DEFAULT, ODOM_MODE_DEFAULT);
+                                SETPOINT_DEFAULT, TIME_DEFAULT, ODOM_MODE_DEFAULT, 
+                                ODOM_MINUTES_DEFAULT, ODOM_TURNS_DEFAULT);
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS, param_storage);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP, param_storage);
 RunTimer          timer(MAX_HOURS, param_storage);
@@ -120,7 +121,13 @@ char* callback_menu_get(char* str_buff, int item_id) {
       sprintf(str_buff, "%02.0f", max(sensors.bed_left_celcius(), sensors.bed_right_celcius()));
     break;
     case MNU_ODOM_MODE_ID:
-      odom_mode_sel(str_buff, odometer.ge_mode());
+      odom_mode_sel(str_buff, odometer.get_mode());
+    break;
+    case MNU_ODOM_MINUTES_ID:
+      sprintf(str_buff, "%d", odometer.get_minutes());
+    break;
+    case MNU_ODOM_TURNS_ID:
+      sprintf(str_buff, "%d", odometer.get_turns());
     break;
     case MNU_KP_ID:
       sprintf(str_buff, "%2.2f", param_storage.kp());
@@ -154,6 +161,7 @@ void callback_menu_end_edit(int item_id) {
       if (heater.get_mode() == MODE_RUN_PID) {
         timer.start();
         heater.start();
+        odometer.start_timer();
       } else if (heater.get_mode() == MODE_STOP) {
         timer.reset();
         heater.stop();
@@ -172,6 +180,8 @@ void callback_menu_end_edit(int item_id) {
     case MNU_BOX_TEMP_ID:
     case MNU_REMAINING_TIME_ID:
     case MNU_ODOM_MODE_ID:
+    case MNU_ODOM_MINUTES_ID:
+    case MNU_ODOM_TURNS_ID:
       param_storage.save();
     break;
     case MNU_FACTORY_RESET_ID:
@@ -184,6 +194,7 @@ void callback_menu_end_edit(int item_id) {
         param_storage.write_setpoint(SETPOINT_DEFAULT);
         param_storage.write_time(TIME_DEFAULT);
         param_storage.write_odom_mode(ODOM_MODE_DEFAULT);
+        param_storage.write_odom_minutes(ODOM_MINUTES_DEFAULT);
         param_storage.save();  
         heater.set_tunings();
       }
@@ -227,11 +238,33 @@ bool callback_menu_set(int value, int item_id) {
     case MNU_ODOM_MODE_ID: 
       odometer.set_mode(value);
     break;
+    case MNU_ODOM_MINUTES_ID: 
+      odometer.set_minutes(value);
+    break;
+    case MNU_ODOM_TURNS_ID: 
+      odometer.set_turns(value);
+    break;
     default:
       return false;
   }
 
   return true;
+}
+
+void callback_odom_start(void) {
+  if (heater.get_mode() == MODE_STOP) {
+    heater.set_mode(MODE_RUN_PID);
+    timer.start();
+    heater.start();
+    odometer.start_timer();
+  }
+}
+
+void callback_odom_stop(void) {
+  if (heater.setpoint_reached()) {
+    timer.reset();
+    heater.stop();
+  }  
 }
 
 /*
@@ -355,7 +388,7 @@ void setup() {
            callback_menu_end_edit, callback_menu_exit);
   sensors.begin();
   heater.begin();
-  odometer.begin();
+  odometer.begin(callback_odom_start, callback_odom_stop);
   
   splash_timer = millis();
 }
@@ -376,6 +409,8 @@ void loop() {
     refresh_display++;
   }
 
+  odometer.update(heater.get_mode() == MODE_RUN_PID);
+  
   // Displays the firmware version screen for a seconds or until the encoder is pressed.
   if (!display_version()) {
     float  bed_temp = max(sensors.bed_left_celcius(), sensors.bed_right_celcius());
@@ -397,8 +432,7 @@ void loop() {
        * Use the Arduino Plotter to plot the system response.
        * Note: The output is converted to percentage.
        */
-      //plot_pid(pwm_val, bed_temp);
-      Serial.print("Odometer counter : "); Serial.println(odometer.get_counter());
+      plot_pid(pwm_val, bed_temp);
     }
   }
 }

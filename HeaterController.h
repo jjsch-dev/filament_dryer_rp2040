@@ -74,6 +74,7 @@ public:
   void stop();
   int tuning_percentage(void );
   void set_tunings(void);
+  bool setpoint_reached(void);
     
 private:
   QuickPID      pid;

@@ -25,21 +25,25 @@
  */ 
 #pragma once
 
-#define CONST_INITED        0x434f4e13 //53        // ASCII = CONS
+#define CONST_INITED          0x434f4e13 //53        // ASCII = CONS
 
-#define ADDRESS_MAGIC_NUM   0
-#define ADDRESS_KP          ADDRESS_MAGIC_NUM + sizeof(int)
-#define ADDRESS_KI          ADDRESS_KP + sizeof(float)
-#define ADDRESS_KD          ADDRESS_KI + sizeof(float) 
-#define ADDRESS_THERMS      ADDRESS_KD + sizeof(float) 
-#define ADDRESS_SETPOINT    ADDRESS_THERMS + sizeof(int)
-#define ADDRESS_TIME        ADDRESS_SETPOINT + sizeof(int)
-#define ADDRESS_ODOM_MODE   ADDRESS_TIME + sizeof(int)
+#define ADDRESS_MAGIC_NUM     0
+#define ADDRESS_KP            ADDRESS_MAGIC_NUM + sizeof(int)
+#define ADDRESS_KI            ADDRESS_KP + sizeof(float)
+#define ADDRESS_KD            ADDRESS_KI + sizeof(float) 
+#define ADDRESS_THERMS        ADDRESS_KD + sizeof(float) 
+#define ADDRESS_SETPOINT      ADDRESS_THERMS + sizeof(int)
+#define ADDRESS_TIME          ADDRESS_SETPOINT + sizeof(int)
+#define ADDRESS_ODOM_MODE     ADDRESS_TIME + sizeof(int)
+#define ADDRESS_ODOM_MINUTES  ADDRESS_ODOM_MODE + sizeof(int)
+#define ADDRESS_ODOM_TURNS    ADDRESS_ODOM_MINUTES + sizeof(int)
 
 class ParamStorage  
 {
 public:
-  ParamStorage(float kp, float ki, float kd, int therms, int setpoint, int hours, int mode);
+  ParamStorage(float kp, float ki, float kd, int therms, 
+               int setpoint, int hours, int odom_mode, 
+               int odom_minutes, int odom_turns);
   ~ParamStorage() {};
   
   bool begin();
@@ -50,6 +54,8 @@ public:
   int   setpoint(void);
   int   get_time(void);
   int   odom_mode(void);
+  int   odom_minutes(void);
+  int   odom_turns(void);
   
   float read_kp(void);
   float read_ki(void);
@@ -58,12 +64,16 @@ public:
   int   read_setpoint(void);
   int   read_time(void);
   int   read_odom_mode(void);
+  int   read_odom_minutes(void);
+  int   read_odom_turns(void);
   
   void write_pid_const(float kp, float ki, float kd);
   void write_therms(int therms);
   void write_setpoint(int temp);
   void write_time(int hours);
   void write_odom_mode(int mode);
+  void write_odom_minutes(int minutes);
+  void write_odom_turns(int turns);
   void save(void);
   
 private:
@@ -77,5 +87,7 @@ private:
   int _setpoint;
   int _time;
   int _odom_mode;
+  int _odom_minutes;
+  int _odom_turns;
   int magic_number;
 };

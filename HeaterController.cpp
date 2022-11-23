@@ -155,7 +155,7 @@ void HeaterController::pwm(int output) {
 /**
  * Use the Arduino PWM function to control the cooler fan in ON/OFF mode.
  */  
-void  HeaterController::fan_cooler(int output) {
+void HeaterController::fan_cooler(int output) {
   digitalWrite(FAN_PIN, (output == OUT_ON) ? HIGH : LOW );
 }
 
@@ -246,7 +246,19 @@ float HeaterController::tune_controller(float input, float bed_temp) {
 void HeaterController::set_tunings(void) {
   pid.SetTunings(pstorage.kp(), pstorage.ki(), pstorage.kd());
 }
-        
+
+bool HeaterController::setpoint_reached(void) {
+  if (pid_status == ST_RUN_PID) {
+    float diff = get_setpoint() - pid_input;
+
+    if ((diff >= -0.5) && (diff <= 0.5)) {
+      return true; 
+    }
+  }
+
+  return false;
+}
+
 int HeaterController::tuning_percentage(void) {
   /*
    * The tuner takes a sample every 1000 mS, both in the setup time and in the 
