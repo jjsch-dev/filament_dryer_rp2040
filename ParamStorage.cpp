@@ -147,7 +147,7 @@ int ParamStorage::read_odom_minutes(void) {
 }
 
 int ParamStorage::read_odom_turns(void) {
-  EEPROM.get(ADDRESS_ODOM_MINUTES, _odom_turns);
+  EEPROM.get(ADDRESS_ODOM_TURNS, _odom_turns);
   return _odom_turns;
 }
   

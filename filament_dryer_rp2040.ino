@@ -78,19 +78,15 @@ void odom_mode_sel(char* str_buff, int mode) {
     case ODOM_MODE_DISABLED:
       sprintf(str_buff, "OFF");
     break;
-
     case ODOM_MODE_START:
       sprintf(str_buff, "STAR");
     break;
-
     case ODOM_MODE_STOP:
       sprintf(str_buff, "STOP");
     break;
-    
     case ODOM_MODE_BOTH:
       sprintf(str_buff, "BOTH");
     break;
-
     default:
       sprintf(str_buff, "-");
   }
@@ -161,7 +157,7 @@ void callback_menu_end_edit(int item_id) {
       if (heater.get_mode() == MODE_RUN_PID) {
         timer.start();
         heater.start();
-        odometer.start_timer();
+        odometer.reset_timer();
       } else if (heater.get_mode() == MODE_STOP) {
         timer.reset();
         heater.stop();
@@ -251,15 +247,23 @@ bool callback_menu_set(int value, int item_id) {
   return true;
 }
 
+/*
+ * Turn on the PID when the filament spool is moving while not in tune.
+ */
 void callback_odom_start(void) {
   if (heater.get_mode() == MODE_STOP) {
     heater.set_mode(MODE_RUN_PID);
     timer.start();
     heater.start();
-    odometer.start_timer();
+    odometer.reset_timer();
   }
 }
 
+/*
+ * It turns off the PID when it detects that the filament spool has not 
+ * moved for the programmed time. 
+ * As long as the PID has reached the programmed temperature.
+ */
 void callback_odom_stop(void) {
   if (heater.setpoint_reached()) {
     timer.reset();
@@ -409,6 +413,7 @@ void loop() {
     refresh_display++;
   }
 
+  // The odometer functions only run in PID mode.
   odometer.update(heater.get_mode() == MODE_RUN_PID);
   
   // Displays the firmware version screen for a seconds or until the encoder is pressed.

@@ -60,7 +60,7 @@ public:
   void set_mode(int value);
   void set_minutes(int value);
   void set_turns(int value);
-  void start_timer(void);
+  void reset_timer(void);
   
 public:  
   void handle_isr();

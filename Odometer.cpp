@@ -50,7 +50,7 @@ bool Odometer::begin(callback_odom_start_t c_start, callback_odom_stop_t c_stop)
   return true;
 }
 
-void Odometer::start_timer(void) {
+void Odometer::reset_timer(void) {
   start_time = millis();
 }
 
@@ -65,8 +65,12 @@ unsigned long now = millis();
   
   if ((pstorage.odom_mode() == ODOM_MODE_STOP) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
     if (pid_on) {
-      if ((pstorage.odom_minutes() * 60000) <= (now - start_time)) {
-        odom_stop();
+      if (last_turns == get_turns()) {
+        if ((pstorage.odom_minutes() * 60000) <= (now - start_time)) {
+          odom_stop();
+        }
+      } else {
+        reset_timer();
       }
     }
   }
@@ -117,6 +121,9 @@ int Odometer::get_turns() {
   return pstorage.odom_turns();
 }
 
+/*
+ * The lap counter can be reset from the menu by turning the encoder to the left.
+ */
 void Odometer::set_turns(int value) {
   if (value < 0) {
     pstorage.write_odom_turns(ODOM_TURNS_DEFAULT);
