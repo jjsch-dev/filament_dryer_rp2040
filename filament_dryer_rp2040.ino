@@ -32,7 +32,7 @@
 #include "ParamStorage.h"
 #include "Odometer.h"
 
-#define FIRMWARE_VERSION      "1.0.1"   // Version actual del firmware.
+#define FIRMWARE_VERSION      "1.0.2"   // Version actual del firmware.
 
 #define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 
@@ -248,7 +248,8 @@ bool callback_menu_set(int value, int item_id) {
 }
 
 /*
- * Turn on the PID when the filament spool is moving while not in tune.
+ * turns on the PID, when it detects that the filament spool is moving 
+ * and is not in tuning mode.
  */
 void callback_odom_start(void) {
   if (heater.get_mode() == MODE_STOP) {
@@ -270,8 +271,8 @@ void callback_odom_stop(void) {
     heater.stop();
   } else {
     /*
-     * Resets the shutdown timer to prevent the stop callback from 
-     * continuously firing while the desired temperature is reached.
+     * Reset the shutdown timer to prevent the stop callback from 
+     * firing continuously while the desired temperature is reached
      */
     odometer.reset_timer();  
   }
