@@ -53,7 +53,7 @@ bool ret_val = false;
     }  
   }
   
-  tm = localtime(&s); 
+  tm = gmtime(&s); 
   
   return ret_val;
 }
@@ -77,11 +77,11 @@ void RunTimer::start() {
 void RunTimer::reset() {
   start_time = 0;
   time_t s = 0;
-  tm = localtime(&s);
+  tm = gmtime(&s);
 }
     
 int RunTimer::get_hours(void) {
-  return tm->tm_hour; 
+  return tm->tm_hour + (tm->tm_yday * 24); 
 }
 
 int RunTimer::get_minutes(void) {
