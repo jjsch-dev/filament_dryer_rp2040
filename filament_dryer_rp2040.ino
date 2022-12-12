@@ -32,7 +32,7 @@
 #include "ParamStorage.h"
 #include "Odometer.h"
 
-#define FIRMWARE_VERSION      "1.0.2"   // Version actual del firmware.
+#define FIRMWARE_VERSION      "1.0.3"   // Version actual del firmware.
 
 #define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 
@@ -58,7 +58,7 @@ bool              factory_reset = false;
 
 ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT,
                                 SETPOINT_DEFAULT, TIME_DEFAULT, ODOM_MODE_DEFAULT, 
-                                ODOM_MINUTES_DEFAULT, ODOM_TURNS_DEFAULT);
+                                ODOM_MINUTES_DEFAULT, ODOM_TURNS_DEFAULT, ODOM_DIAMETER_DEFAULT);
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS, param_storage);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP, param_storage);
 RunTimer          timer(MAX_HOURS, param_storage);
@@ -123,7 +123,10 @@ char* callback_menu_get(char* str_buff, int item_id) {
       sprintf(str_buff, "%d", odometer.get_minutes());
     break;
     case MNU_ODOM_TURNS_ID:
-      sprintf(str_buff, "%d", odometer.get_turns());
+      sprintf(str_buff, "%2.1f", odometer.get_turns());
+    break;
+    case MNU_ODOM_DIAMETER_ID:
+      sprintf(str_buff, "%d", odometer.get_diameter());
     break;
     case MNU_KP_ID:
       sprintf(str_buff, "%2.2f", param_storage.kp());
@@ -178,6 +181,7 @@ void callback_menu_end_edit(int item_id) {
     case MNU_ODOM_MODE_ID:
     case MNU_ODOM_MINUTES_ID:
     case MNU_ODOM_TURNS_ID:
+    case MNU_ODOM_DIAMETER_ID:
       param_storage.save();
     break;
     case MNU_FACTORY_RESET_ID:
@@ -191,6 +195,7 @@ void callback_menu_end_edit(int item_id) {
         param_storage.write_time(TIME_DEFAULT);
         param_storage.write_odom_mode(ODOM_MODE_DEFAULT);
         param_storage.write_odom_minutes(ODOM_MINUTES_DEFAULT);
+        param_storage.write_odom_diameter(ODOM_DIAMETER_DEFAULT);
         param_storage.save();  
         heater.set_tunings();
       }
@@ -236,6 +241,9 @@ bool callback_menu_set(int value, int item_id) {
     break;
     case MNU_ODOM_MINUTES_ID: 
       odometer.set_minutes(value);
+    break;
+    case MNU_ODOM_DIAMETER_ID: 
+      odometer.set_diameter(value);
     break;
     case MNU_ODOM_TURNS_ID: 
       odometer.set_turns(value);

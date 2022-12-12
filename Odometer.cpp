@@ -117,8 +117,26 @@ void Odometer::set_minutes(int value) {
   }   
 }
 
-int Odometer::get_turns() {
-  return pstorage.odom_turns();
+void Odometer::set_diameter(int value) {
+  int new_val = pstorage.odom_diameter() + value;
+  
+  if ((new_val >= ODOM_DIAMETER_MIN) && (new_val <= ODOM_DIAMETER_MAX)) {
+    pstorage.write_odom_diameter(new_val);
+  }   
+}
+
+float Odometer::get_turns() {
+  float diam_ratio = ODOM_ENCODER_DIAMETER;
+  diam_ratio /= pstorage.odom_diameter();
+  
+  float encoder_turns = pstorage.odom_turns();
+  encoder_turns /= ODOM_PULSES_BY_TURNS;
+  
+  return (encoder_turns * diam_ratio);
+}
+
+int Odometer::get_diameter() {
+  return pstorage.odom_diameter();
 }
 
 /*

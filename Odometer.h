@@ -42,6 +42,13 @@
 
 #define ODOM_TURNS_DEFAULT      0
 
+#define ODOM_DIAMETER_MIN       0
+#define ODOM_DIAMETER_MAX       220   // Max 220 mm
+#define ODOM_DIAMETER_DEFAULT   200   // Min 200 mm
+
+#define ODOM_ENCODER_DIAMETER   13.7  // The theoretical diameter is 13.9, the print may differ by a few tenths.
+#define ODOM_PULSES_BY_TURNS    6     // The enconder have 6 pulses by laps.
+
 typedef void (*callback_odom_start_t)(void);
 typedef void (*callback_odom_stop_t)(void);
 
@@ -56,10 +63,12 @@ public:
   int get_counter();  
   int get_mode();
   int get_minutes();
-  int get_turns();
+  float get_turns();
+  int get_diameter();
   void set_mode(int value);
   void set_minutes(int value);
   void set_turns(int value);
+  void set_diameter(int value);
   void reset_timer(void);
   
 public:  

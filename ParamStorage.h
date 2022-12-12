@@ -27,23 +27,24 @@
 
 #define CONST_INITED          0x434f4e13 //53        // ASCII = CONS
 
-#define ADDRESS_MAGIC_NUM     0
-#define ADDRESS_KP            ADDRESS_MAGIC_NUM + sizeof(int)
-#define ADDRESS_KI            ADDRESS_KP + sizeof(float)
-#define ADDRESS_KD            ADDRESS_KI + sizeof(float) 
-#define ADDRESS_THERMS        ADDRESS_KD + sizeof(float) 
-#define ADDRESS_SETPOINT      ADDRESS_THERMS + sizeof(int)
-#define ADDRESS_TIME          ADDRESS_SETPOINT + sizeof(int)
-#define ADDRESS_ODOM_MODE     ADDRESS_TIME + sizeof(int)
-#define ADDRESS_ODOM_MINUTES  ADDRESS_ODOM_MODE + sizeof(int)
-#define ADDRESS_ODOM_TURNS    ADDRESS_ODOM_MINUTES + sizeof(int)
+#define ADDRESS_MAGIC_NUM       0
+#define ADDRESS_KP              ADDRESS_MAGIC_NUM + sizeof(int)
+#define ADDRESS_KI              ADDRESS_KP + sizeof(float)
+#define ADDRESS_KD              ADDRESS_KI + sizeof(float) 
+#define ADDRESS_THERMS          ADDRESS_KD + sizeof(float) 
+#define ADDRESS_SETPOINT        ADDRESS_THERMS + sizeof(int)
+#define ADDRESS_TIME            ADDRESS_SETPOINT + sizeof(int)
+#define ADDRESS_ODOM_MODE       ADDRESS_TIME + sizeof(int)
+#define ADDRESS_ODOM_MINUTES    ADDRESS_ODOM_MODE + sizeof(int)
+#define ADDRESS_ODOM_TURNS      ADDRESS_ODOM_MINUTES + sizeof(int)
+#define ADDRESS_ODOM_DIAMETER   ADDRESS_ODOM_TURNS + sizeof(int)
 
 class ParamStorage  
 {
 public:
   ParamStorage(float kp, float ki, float kd, int therms, 
                int setpoint, int hours, int odom_mode, 
-               int odom_minutes, int odom_turns);
+               int odom_minutes, int odom_turns, int odom_diameter);
   ~ParamStorage() {};
   
   bool begin();
@@ -56,6 +57,7 @@ public:
   int   odom_mode(void);
   int   odom_minutes(void);
   int   odom_turns(void);
+  int   odom_diameter(void);
   
   float read_kp(void);
   float read_ki(void);
@@ -66,6 +68,7 @@ public:
   int   read_odom_mode(void);
   int   read_odom_minutes(void);
   int   read_odom_turns(void);
+  int   read_odom_diameter(void);
   
   void write_pid_const(float kp, float ki, float kd);
   void write_therms(int therms);
@@ -74,6 +77,8 @@ public:
   void write_odom_mode(int mode);
   void write_odom_minutes(int minutes);
   void write_odom_turns(int turns);
+  void write_odom_diameter(int diam);
+  
   void save(void);
   
 private:
@@ -89,5 +94,6 @@ private:
   int _odom_mode;
   int _odom_minutes;
   int _odom_turns;
+  int _odom_diameter;
   int magic_number;
 };

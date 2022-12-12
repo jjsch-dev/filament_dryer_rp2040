@@ -29,7 +29,8 @@
 
 ParamStorage::ParamStorage(float kp, float ki, float kd, int therms, 
                            int setpoint, int hours, int odom_mode, 
-                           int odom_minutes, int odom_turns) {
+                           int odom_minutes, int odom_turns,
+                           int odom_diameter) {
   _kp = kp;
   _ki = ki;
   _kd = kd;
@@ -39,6 +40,7 @@ ParamStorage::ParamStorage(float kp, float ki, float kd, int therms,
   _odom_mode = odom_mode;
   _odom_minutes = odom_minutes;
   _odom_turns = odom_turns;
+  _odom_diameter = odom_diameter;
 }
 
 bool ParamStorage::begin(void) {
@@ -54,6 +56,7 @@ bool ParamStorage::begin(void) {
     read_odom_mode();
     read_odom_minutes();
     read_odom_turns();
+    read_odom_diameter();
     return true;
   } 
   
@@ -106,6 +109,10 @@ int ParamStorage::odom_turns(void) {
   return _odom_turns;
 }
 
+int ParamStorage::odom_diameter(void) {
+  return _odom_diameter;
+}
+
 float ParamStorage::read_kp(void) {
   EEPROM.get(ADDRESS_KP, _kp);
   return _kp;
@@ -150,6 +157,11 @@ int ParamStorage::read_odom_turns(void) {
   EEPROM.get(ADDRESS_ODOM_TURNS, _odom_turns);
   return _odom_turns;
 }
+
+int ParamStorage::read_odom_diameter(void) {
+  EEPROM.get(ADDRESS_ODOM_DIAMETER, _odom_diameter);
+  return _odom_diameter;
+}
   
 void ParamStorage::write_pid_const(float kp, float ki, float kd) {
   _kp = kp;
@@ -188,6 +200,11 @@ void ParamStorage::write_odom_minutes(int minutes) {
 void ParamStorage::write_odom_turns(int turns) {
   _odom_turns = turns;
   EEPROM.put(ADDRESS_ODOM_TURNS, _odom_turns);
+}
+
+void ParamStorage::write_odom_diameter(int diameter) {
+  _odom_diameter = diameter;
+  EEPROM.put(ADDRESS_ODOM_DIAMETER, _odom_diameter);
 }
 
 /*
