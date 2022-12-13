@@ -55,9 +55,9 @@ menu_item_t menu_list[] = {
   {" off:",   MENU_MODE_EDIT, 90},
   {" dia:",   MENU_MODE_EDIT, 80},
   {" t:",     MENU_MODE_EDIT, 50},
-  {"Kp:",     MENU_MODE_INFO, 60},
-  {"Ki:",     MENU_MODE_INFO, 60},
-  {"Kd:",     MENU_MODE_INFO, 60},
+  {"Kp:",     MENU_MODE_INFO, 50},
+  {"Ki:",     MENU_MODE_INFO, 50},
+  {"Kd:",     MENU_MODE_INFO, 50},
   {"Frst:",   MENU_MODE_EDIT, 80},
   {"V:",      MENU_MODE_INFO, 50}
 };
