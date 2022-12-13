@@ -51,6 +51,9 @@
 #define ITEM_CAPTION_LEN      16
 #define DISPLAY_LINES         3
 
+#define UI_EXIT_TIMEOUT       60000     // User idle time to exit the menu in mS.
+#define UI_UPDATE_TIMEOUT     1000      // Update the menu info when expire.
+
 typedef char* (*callback_get_t)(char* value, int item_id);
 typedef bool (*callback_set_t)(int value, int id);
 typedef void (*callback_end_edit_t)(int id);
@@ -85,7 +88,11 @@ private:
   int               menu_mode;
   int               menu_end; 
   int               click_count = 0;
-
+  unsigned long     exit_timeout;
+  unsigned long     update_timeout;
+  
+  void reset_timeout(void); 
+  
 private:  
   callback_get_t        item_get;
   callback_set_t        item_set;

@@ -42,12 +42,31 @@ UserInterface::UserInterface(menu_item_t* m_list, size_t m_size) :
   menu_mode = 0;
   menu_sel  = 0;
   
+  reset_timeout();
+  
   p_ui = this;
 }
 
 int UserInterface::update() {
+unsigned long now;
+
   eb->update();
 
+  /*
+   * If it is in setup mode, and user idle time expired, it exits the menu and in the 
+   * while refreshes the menu data every second (useful for bed temperature and odometer).
+   */
+  if (menu_mode != MENU_MODE_INFO) {
+    now = millis();
+    if (UI_EXIT_TIMEOUT <= (now - exit_timeout)) {
+      menu_exit(menu_sel);
+      menu_mode = MENU_MODE_INFO;
+    } else if (UI_UPDATE_TIMEOUT <= (now - update_timeout)) { 
+      update_timeout = now;
+      display_menu();
+    }    
+  }
+  
   return menu_mode;
 }
 
@@ -129,6 +148,8 @@ char buff[ITEM_CAPTION_LEN];
  */
 void UserInterface::on_click(void) {
 
+  reset_timeout();
+  
   if (menu_mode == MENU_MODE_INFO) {
     menu_mode = MENU_MODE_SEL;
     menu_sel = 0;
@@ -155,6 +176,8 @@ void UserInterface::on_click(void) {
 void UserInterface::on_encoder(int increment) {
 int new_val;
 
+  reset_timeout();
+  
   if (menu_mode != MENU_MODE_INFO) {
     if (menu_mode == MENU_MODE_EDIT) {
       item_set(increment, menu_sel);
@@ -172,4 +195,9 @@ int new_val;
 
 int UserInterface::clicks(void) {
   return click_count; 
+}
+
+void UserInterface::reset_timeout(void) {
+  exit_timeout = millis();
+  update_timeout = exit_timeout;  
 }
