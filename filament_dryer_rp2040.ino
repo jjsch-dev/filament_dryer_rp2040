@@ -32,7 +32,7 @@
 #include "ParamStorage.h"
 #include "Odometer.h"
 
-#define FIRMWARE_VERSION      "1.0.4"   // Version actual del firmware.
+#define FIRMWARE_VERSION      "1.0.5"   // Version actual del firmware.
 
 #define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 
@@ -392,6 +392,7 @@ static bool one_time = true;
     Serial.print("Kp: "); Serial.print(param_storage.kp());
     Serial.print(" Ki: "); Serial.print(param_storage.ki());
     Serial.print(" Kd: "); Serial.println(param_storage.kd());
+    Serial.print("Spool turns: "); Serial.println(odometer.get_turns(), 2);
     one_time = false;
   } 
 }
