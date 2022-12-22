@@ -30,6 +30,7 @@
 
 #include <QuickPID.h>
 #include <sTune.h>
+#include <Servo.h>
 
 #include "ParamStorage.h"
 
@@ -58,6 +59,10 @@
 #define MAX_SETPOINT            60      // Maximun Box temperature.
 #define SETPOINT_DEFAULT        50
 
+#define MOISTURE_SERVO_PIN      28      // Pin to control the humidity ventilation servo.
+#define MOISTURE_DOOR_CLOSE     0       // The vent door closes when the servo is at the zero degree position.
+#define MOISTURE_DOOR_OPEN      45      // The vent door is open when the servo is at the 45 degree position.
+
 class HeaterController 
 {
 public:
@@ -79,6 +84,7 @@ public:
 private:
   QuickPID      pid;
   sTune         tuner; 
+  Servo         moisture_servo;  
   ParamStorage& pstorage;
   
   int   _mode;

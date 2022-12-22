@@ -79,6 +79,13 @@ bool HeaterController::begin(void) {
   
   fan_cooler(OUT_OFF);
   pwm(OUT_OFF);
+ 
+  moisture_servo.attach(MOISTURE_SERVO_PIN);  // attaches the servo on GI28
+
+  // Close the moisture vent door.
+  if (moisture_servo.read() != MOISTURE_DOOR_CLOSE) {
+    moisture_servo.write(MOISTURE_DOOR_CLOSE);   
+  }
   
   return true;
 }
@@ -141,6 +148,7 @@ void HeaterController::stop(void) {
    *  Initializes the PID or Tuner when the previous mode is different from the current one.
    */
   fan_cooler(OUT_OFF);
+  moisture_servo.write(MOISTURE_DOOR_CLOSE);
   pwm(OUT_OFF);
   pid_status = ST_DISABLED;
   tune_status = ST_DISABLED;
@@ -166,12 +174,14 @@ float HeaterController::pid_controller(float box_temp, float bed_temp) {
     case ST_DISABLED:
       pid.SetMode(pid.Control::manual);
       fan_cooler(OUT_OFF);
+      moisture_servo.write(MOISTURE_DOOR_CLOSE); 
     break;
     case ST_INITIALICE:
       pid.SetMode(pid.Control::manual);
       pid_output = 0;
       pid.SetMode(pid.Control::automatic);
       fan_cooler(OUT_ON);
+      moisture_servo.write(MOISTURE_DOOR_OPEN); 
       pid_status = ST_RUN_PID; 
     break;
     case ST_RUN_PID:
@@ -203,7 +213,7 @@ float HeaterController::tune_controller(float input, float bed_temp) {
       pid.SetMode(pid.Control::manual);
       pid_output = 0;   
       fan_cooler(OUT_ON); 
-
+      moisture_servo.write(MOISTURE_DOOR_OPEN); 
       tuner.Reset();
       tune_samples_count = 0;
       tune_status = ST_RUN_PID;
