@@ -32,7 +32,7 @@
 #include "ParamStorage.h"
 #include "Odometer.h"
 
-#define FIRMWARE_VERSION      "1.0.6"   // Version actual del firmware.
+#define FIRMWARE_VERSION      "1.0.7"   // Version actual del firmware.
 
 #define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 
@@ -58,7 +58,8 @@ bool              factory_reset = false;
 
 ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT,
                                 SETPOINT_DEFAULT, TIME_DEFAULT, ODOM_MODE_DEFAULT, 
-                                ODOM_MINUTES_DEFAULT, ODOM_TURNS_DEFAULT, ODOM_DIAMETER_DEFAULT);
+                                ODOM_MINUTES_DEFAULT, ODOM_TURNS_DEFAULT, 
+                                ODOM_DIAMETER_DEFAULT, MOISTURE_DOOR_CLOSE);
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS, param_storage);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP, param_storage);
 RunTimer          timer(MAX_HOURS, param_storage);
@@ -128,6 +129,9 @@ char* callback_menu_get(char* str_buff, int item_id) {
     case MNU_ODOM_DIAMETER_ID:
       sprintf(str_buff, "%d", odometer.get_diameter());
     break;
+    case MNU_MOISTURE_IDLE_ID:
+      sprintf(str_buff, "%d", param_storage.moisture_idle_angle());
+    break;
     case MNU_KP_ID:
       sprintf(str_buff, "%2.2f", param_storage.kp());
     break;
@@ -182,6 +186,7 @@ void callback_menu_end_edit(int item_id) {
     case MNU_ODOM_MINUTES_ID:
     case MNU_ODOM_TURNS_ID:
     case MNU_ODOM_DIAMETER_ID:
+    case MNU_MOISTURE_IDLE_ID:
       param_storage.save();
     break;
     case MNU_FACTORY_RESET_ID:
@@ -247,6 +252,9 @@ bool callback_menu_set(int value, int item_id) {
     break;
     case MNU_ODOM_TURNS_ID: 
       odometer.set_turns(value);
+    break;
+    case MNU_MOISTURE_IDLE_ID:
+      heater.set_moisture_idle_angle(value);  
     break;
     default:
       return false;

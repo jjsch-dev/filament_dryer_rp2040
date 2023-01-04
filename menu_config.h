@@ -37,11 +37,12 @@
 #define MNU_ODOM_MINUTES_ID         8
 #define MNU_ODOM_DIAMETER_ID        9
 #define MNU_ODOM_TURNS_ID           10
-#define MNU_KP_ID                   11
-#define MNU_KI_ID                   12
-#define MNU_KD_ID                   13
-#define MNU_FACTORY_RESET_ID        14
-#define MNU_FIRMWARE_VERSION_ID     15
+#define MNU_MOISTURE_IDLE_ID        11
+#define MNU_KP_ID                   12
+#define MNU_KI_ID                   13
+#define MNU_KD_ID                   14
+#define MNU_FACTORY_RESET_ID        15
+#define MNU_FIRMWARE_VERSION_ID     16
 
 menu_item_t menu_list[] = {
   {"Exit",    MENU_MODE_EXIT, 80},
@@ -55,6 +56,7 @@ menu_item_t menu_list[] = {
   {" off:",   MENU_MODE_EDIT, 90},
   {" dia:",   MENU_MODE_EDIT, 80},
   {" t:",     MENU_MODE_EDIT, 50},
+  {"Idle:",   MENU_MODE_EDIT, 80},
   {"Kp:",     MENU_MODE_INFO, 50},
   {"Ki:",     MENU_MODE_INFO, 50},
   {"Kd:",     MENU_MODE_INFO, 50},

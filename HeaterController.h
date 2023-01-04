@@ -62,6 +62,9 @@
 #define MOISTURE_SERVO_PIN      28      // Pin to control the humidity ventilation servo.
 #define MOISTURE_DOOR_CLOSE     0       // The vent door closes when the servo is at the zero degree position.
 #define MOISTURE_DOOR_OPEN      45      // The vent door is open when the servo is at the 45 degree position.
+#define MOISTURE_DOOR_MIN       0       // This is a 180 degree servo.
+#define MOISTURE_DOOR_MAX       180     // This is a 180 degree servo.
+
 
 class HeaterController 
 {
@@ -80,7 +83,8 @@ public:
   int tuning_percentage(void );
   void set_tunings(void);
   bool setpoint_reached(void);
-    
+  void set_moisture_idle_angle(int value); 
+   
 private:
   QuickPID      pid;
   sTune         tuner; 
@@ -121,4 +125,5 @@ private:
   float tune_controller(float input, float bed_temp);
   void  pwm(int output);
   void  fan_cooler(int output);
+  bool moisture_door(int angle);
 };

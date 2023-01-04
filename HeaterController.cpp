@@ -82,12 +82,7 @@ bool HeaterController::begin(void) {
  
   moisture_servo.attach(MOISTURE_SERVO_PIN);  // attaches the servo on GI28
 
-  // Close the moisture vent door.
-  if (moisture_servo.read() != MOISTURE_DOOR_CLOSE) {
-    moisture_servo.write(MOISTURE_DOOR_CLOSE);   
-  }
-  
-  return true;
+  return moisture_door(MOISTURE_DOOR_CLOSE);
 }
 
 float HeaterController::update(float box_temp, float bed_temp) {
@@ -148,7 +143,7 @@ void HeaterController::stop(void) {
    *  Initializes the PID or Tuner when the previous mode is different from the current one.
    */
   fan_cooler(OUT_OFF);
-  moisture_servo.write(MOISTURE_DOOR_CLOSE);
+  moisture_door(MOISTURE_DOOR_CLOSE);
   pwm(OUT_OFF);
   pid_status = ST_DISABLED;
   tune_status = ST_DISABLED;
@@ -174,14 +169,14 @@ float HeaterController::pid_controller(float box_temp, float bed_temp) {
     case ST_DISABLED:
       pid.SetMode(pid.Control::manual);
       fan_cooler(OUT_OFF);
-      moisture_servo.write(MOISTURE_DOOR_CLOSE); 
+      moisture_door(MOISTURE_DOOR_CLOSE); 
     break;
     case ST_INITIALICE:
       pid.SetMode(pid.Control::manual);
       pid_output = 0;
       pid.SetMode(pid.Control::automatic);
       fan_cooler(OUT_ON);
-      moisture_servo.write(MOISTURE_DOOR_OPEN); 
+      moisture_door(MOISTURE_DOOR_OPEN); 
       pid_status = ST_RUN_PID; 
     break;
     case ST_RUN_PID:
@@ -213,7 +208,7 @@ float HeaterController::tune_controller(float input, float bed_temp) {
       pid.SetMode(pid.Control::manual);
       pid_output = 0;   
       fan_cooler(OUT_ON); 
-      moisture_servo.write(MOISTURE_DOOR_OPEN); 
+      moisture_door(MOISTURE_DOOR_OPEN); 
       tuner.Reset();
       tune_samples_count = 0;
       tune_status = ST_RUN_PID;
@@ -280,4 +275,31 @@ int HeaterController::tuning_percentage(void) {
   total *= 100;
   
   return total;
+}
+
+bool HeaterController::moisture_door(int angle) {
+  // Control del position of the moisture vent door.
+  if (pstorage.moisture_idle_angle() < MOISTURE_DOOR_MAX) {
+    int position = pstorage.moisture_idle_angle() + angle;
+    if (moisture_servo.read() != position) {
+      moisture_servo.write(position);   
+    }
+  
+    return true;
+  }
+
+  return false;
+}
+
+void HeaterController::set_moisture_idle_angle(int value) {
+  int new_val = pstorage.moisture_idle_angle() + value;
+  
+  if ((new_val >= MOISTURE_DOOR_MIN) && (new_val <= MOISTURE_DOOR_MAX)) {
+    moisture_servo.write(new_val);
+    if (moisture_servo.read() == new_val) {
+      pstorage.write_moisture_idle_angle(new_val);  
+    }
+  } else {
+    pstorage.write_moisture_idle_angle(moisture_servo.read());      
+  }
 }

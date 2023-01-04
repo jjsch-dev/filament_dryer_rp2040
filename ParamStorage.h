@@ -38,13 +38,15 @@
 #define ADDRESS_ODOM_MINUTES    ADDRESS_ODOM_MODE + sizeof(int)
 #define ADDRESS_ODOM_TURNS      ADDRESS_ODOM_MINUTES + sizeof(int)
 #define ADDRESS_ODOM_DIAMETER   ADDRESS_ODOM_TURNS + sizeof(int)
+#define ADDRESS_MOISTURE_IDLE   ADDRESS_ODOM_DIAMETER + sizeof(int)
 
 class ParamStorage  
 {
 public:
   ParamStorage(float kp, float ki, float kd, int therms, 
                int setpoint, int hours, int odom_mode, 
-               int odom_minutes, int odom_turns, int odom_diameter);
+               int odom_minutes, int odom_turns, 
+               int odom_diameter, int moisture_idle_angle);
   ~ParamStorage() {};
   
   bool begin();
@@ -58,6 +60,7 @@ public:
   int   odom_minutes(void);
   int   odom_turns(void);
   int   odom_diameter(void);
+  int   moisture_idle_angle(void);
   
   float read_kp(void);
   float read_ki(void);
@@ -69,6 +72,7 @@ public:
   int   read_odom_minutes(void);
   int   read_odom_turns(void);
   int   read_odom_diameter(void);
+  int   read_moisture_idle_angle(void);
   
   void write_pid_const(float kp, float ki, float kd);
   void write_therms(int therms);
@@ -78,6 +82,7 @@ public:
   void write_odom_minutes(int minutes);
   void write_odom_turns(int turns);
   void write_odom_diameter(int diam);
+  void write_moisture_idle_angle(int angle);
   
   void save(void);
   
@@ -95,5 +100,6 @@ private:
   int _odom_minutes;
   int _odom_turns;
   int _odom_diameter;
+  int _moisture_idle_angle;
   int magic_number;
 };
