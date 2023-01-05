@@ -59,7 +59,8 @@ bool              factory_reset = false;
 ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT,
                                 SETPOINT_DEFAULT, TIME_DEFAULT, ODOM_MODE_DEFAULT, 
                                 ODOM_MINUTES_DEFAULT, ODOM_TURNS_DEFAULT, 
-                                ODOM_DIAMETER_DEFAULT, MOISTURE_DOOR_CLOSE);
+                                ODOM_DIAMETER_DEFAULT, MOISTURE_CLOSE_DEFAULT, 
+                                MOISTURE_OPEN_DEFAULT);
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS, param_storage);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP, param_storage);
 RunTimer          timer(MAX_HOURS, param_storage);
@@ -129,8 +130,11 @@ char* callback_menu_get(char* str_buff, int item_id) {
     case MNU_ODOM_DIAMETER_ID:
       sprintf(str_buff, "%d", odometer.get_diameter());
     break;
-    case MNU_MOISTURE_IDLE_ID:
-      sprintf(str_buff, "%d", param_storage.moisture_idle_angle());
+    case MNU_MOISTURE_CLOSE_ID:
+      sprintf(str_buff, "%d", param_storage.moisture_close_angle());
+    break;
+    case MNU_MOISTURE_OPEN_ID:
+      sprintf(str_buff, "%d", param_storage.moisture_open_angle());
     break;
     case MNU_KP_ID:
       sprintf(str_buff, "%2.2f", param_storage.kp());
@@ -186,7 +190,8 @@ void callback_menu_end_edit(int item_id) {
     case MNU_ODOM_MINUTES_ID:
     case MNU_ODOM_TURNS_ID:
     case MNU_ODOM_DIAMETER_ID:
-    case MNU_MOISTURE_IDLE_ID:
+    case MNU_MOISTURE_CLOSE_ID:
+    case MNU_MOISTURE_OPEN_ID:
       param_storage.save();
     break;
     case MNU_FACTORY_RESET_ID:
@@ -201,6 +206,8 @@ void callback_menu_end_edit(int item_id) {
         param_storage.write_odom_mode(ODOM_MODE_DEFAULT);
         param_storage.write_odom_minutes(ODOM_MINUTES_DEFAULT);
         param_storage.write_odom_diameter(ODOM_DIAMETER_DEFAULT);
+        param_storage.write_moisture_close_angle(MOISTURE_CLOSE_DEFAULT);
+        param_storage.write_moisture_open_angle(MOISTURE_OPEN_DEFAULT);
         param_storage.save();  
         heater.set_tunings();
       }
@@ -253,8 +260,11 @@ bool callback_menu_set(int value, int item_id) {
     case MNU_ODOM_TURNS_ID: 
       odometer.set_turns(value);
     break;
-    case MNU_MOISTURE_IDLE_ID:
-      heater.set_moisture_idle_angle(value);  
+    case MNU_MOISTURE_CLOSE_ID:
+      heater.set_moisture_angle(false, value);  
+    break;
+    case MNU_MOISTURE_OPEN_ID:
+      heater.set_moisture_angle(true, value);  
     break;
     default:
       return false;

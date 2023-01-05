@@ -30,7 +30,8 @@
 ParamStorage::ParamStorage(float kp, float ki, float kd, int therms, 
                            int setpoint, int hours, int odom_mode, 
                            int odom_minutes, int odom_turns,
-                           int odom_diameter, int moisture_idle_angle) {
+                           int odom_diameter, int moisture_close_angle,
+                           int moisture_open_angle) {
   _kp = kp;
   _ki = ki;
   _kd = kd;
@@ -41,7 +42,8 @@ ParamStorage::ParamStorage(float kp, float ki, float kd, int therms,
   _odom_minutes = odom_minutes;
   _odom_turns = odom_turns;
   _odom_diameter = odom_diameter;
-  _moisture_idle_angle = moisture_idle_angle;
+  _moisture_close_angle = moisture_close_angle;
+  _moisture_open_angle = moisture_open_angle;
 }
 
 bool ParamStorage::begin(void) {
@@ -58,7 +60,8 @@ bool ParamStorage::begin(void) {
     read_odom_minutes();
     read_odom_turns();
     read_odom_diameter();
-    read_moisture_idle_angle();
+    read_moisture_close_angle();
+    read_moisture_open_angle();
     return true;
   } 
   
@@ -115,8 +118,12 @@ int ParamStorage::odom_diameter(void) {
   return _odom_diameter;
 }
 
-int ParamStorage::moisture_idle_angle(void) {
-  return _moisture_idle_angle;
+int ParamStorage::moisture_close_angle(void) {
+  return _moisture_close_angle;
+}
+
+int ParamStorage::moisture_open_angle(void) {
+  return _moisture_open_angle;
 }
 
 float ParamStorage::read_kp(void) {
@@ -169,9 +176,14 @@ int ParamStorage::read_odom_diameter(void) {
   return _odom_diameter;
 }
 
-int ParamStorage::read_moisture_idle_angle(void) {
-  EEPROM.get(ADDRESS_MOISTURE_IDLE, _moisture_idle_angle);
-  return _moisture_idle_angle;
+int ParamStorage::read_moisture_close_angle(void) {
+  EEPROM.get(ADDRESS_MOISTURE_CLOSE, _moisture_close_angle);
+  return _moisture_close_angle;
+}
+
+int ParamStorage::read_moisture_open_angle(void) {
+  EEPROM.get(ADDRESS_MOISTURE_OPEN, _moisture_open_angle);
+  return _moisture_open_angle;
 }
 
 void ParamStorage::write_pid_const(float kp, float ki, float kd) {
@@ -218,9 +230,14 @@ void ParamStorage::write_odom_diameter(int diameter) {
   EEPROM.put(ADDRESS_ODOM_DIAMETER, _odom_diameter);
 }
 
-void ParamStorage::write_moisture_idle_angle(int angle) {
-  _moisture_idle_angle = angle;
-  EEPROM.put(ADDRESS_MOISTURE_IDLE, angle);
+void ParamStorage::write_moisture_close_angle(int angle) {
+  _moisture_close_angle = angle;
+  EEPROM.put(ADDRESS_MOISTURE_CLOSE, angle);
+}
+
+void ParamStorage::write_moisture_open_angle(int angle) {
+  _moisture_open_angle = angle;
+  EEPROM.put(ADDRESS_MOISTURE_OPEN, angle);
 }
 
 /*
