@@ -37,8 +37,8 @@
 #define MNU_ODOM_MINUTES_ID         8
 #define MNU_ODOM_DIAMETER_ID        9
 #define MNU_ODOM_TURNS_ID           10
-#define MNU_MOISTURE_CLOSE_ID       11
-#define MNU_MOISTURE_OPEN_ID        12
+#define MNU_MOISTURE_OPEN_ID        11
+#define MNU_MOISTURE_CLOSE_ID       12
 #define MNU_KP_ID                   13
 #define MNU_KI_ID                   14
 #define MNU_KD_ID                   15

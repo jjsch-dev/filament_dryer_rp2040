@@ -282,12 +282,10 @@ bool HeaterController::moisture_door(bool state) {
   int angle = state ? pstorage.moisture_open_angle() : pstorage.moisture_close_angle();
   
   // Control del position of the moisture vent door.
-  if (angle <= MOISTURE_DOOR_MAX) {
-    if (moisture_servo.read() != angle) {
-      moisture_servo.write(angle);   
-    }
-  
-    return true;
+  if ((angle >= MOISTURE_DOOR_MIN) && (angle <= MOISTURE_DOOR_MAX)) {
+    moisture_servo.write(angle);
+    
+    return (moisture_servo.read() == angle);
   }
 
   return false;
