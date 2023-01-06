@@ -42,7 +42,7 @@ HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed, Par
   tune_input_span = 60;
   tune_output_span = pwm_res; 
   tune_output_start = 0;
-  tune_output_step = (pwm_res * 20) / 100;  // Set initial step in % depending on pwm resolution;
+  tune_output_step = (pwm_res * 40) / 100;  // Set initial step in % depending on pwm resolution;
   tune_temp_limit = 60;
   tune_debounce = 1;
   tune_samples_count = 0;
@@ -79,8 +79,13 @@ bool HeaterController::begin(void) {
   
   fan_cooler(OUT_OFF);
   pwm(OUT_OFF);
- 
-  moisture_servo.attach(MOISTURE_SERVO_PIN);  // attaches the servo on GI28
+
+  /* attaches the servo on PIN GI28.
+   * min pulse width in microseconds, corresponding to 0 degree angle (defaults to 544)
+   * max pulse width in microseconds, corresponding to 180 degree angle (defaults to 2400)
+   * See: https://github.com/earlephilhower/arduino-pico/issues/776
+   */
+  moisture_servo.attach(MOISTURE_SERVO_PIN, 544, 2400);   
 
   return moisture_door(false);
 }

@@ -38,9 +38,9 @@
 #define MODE_RUN_PID            1
 #define MODE_RUN_TUNE           2
 
-#define KP_DEFAULT              10.16  
-#define KI_DEFAULT              0.04    
-#define KD_DEFAULT              0.11    
+#define KP_DEFAULT              35.86 //10.16  
+#define KI_DEFAULT              0.07  //0.04    
+#define KD_DEFAULT              0.28  //0.11    
 
 #define ST_DISABLED             0
 #define ST_INITIALICE           1
@@ -60,9 +60,9 @@
 #define SETPOINT_DEFAULT        50
 
 #define MOISTURE_SERVO_PIN      28      // Pin to control the humidity ventilation servo.
-#define MOISTURE_DOOR_MIN       0       // This is a minimun degree of the servo.
-#define MOISTURE_DOOR_MAX       180     // This is a minimun degree of the servo.
-#define MOISTURE_CLOSE_DEFAULT  90      // The default position of the vent door for close.
+#define MOISTURE_DOOR_MIN       0       // This is a minimun degree angle of the servo.
+#define MOISTURE_DOOR_MAX       180     // This is a maximun degree angle of the servo.
+#define MOISTURE_CLOSE_DEFAULT  95      // The default position of the vent door for close.
 #define MOISTURE_OPEN_DEFAULT   45      // The default position of the vent door for open.
 
 
