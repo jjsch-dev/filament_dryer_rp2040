@@ -127,4 +127,5 @@ private:
   void  pwm(int output);
   void  fan_cooler(int output);
   bool moisture_door(bool state);
+  bool moisture_move(int angle);
 };

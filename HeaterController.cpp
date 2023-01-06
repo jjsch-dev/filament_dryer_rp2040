@@ -143,10 +143,6 @@ void HeaterController::start(void) {
 }
 
 void HeaterController::stop(void) {
-  /* 
-   *  If the mode is to stop the heater, it turns off the fan and the PWM output. 
-   *  Initializes the PID or Tuner when the previous mode is different from the current one.
-   */
   fan_cooler(OUT_OFF);
   moisture_door(false);
   pwm(OUT_OFF);
@@ -160,9 +156,6 @@ void HeaterController::pwm(int output) {
   analogWrite(HOT_BED_RIGHT_PIN, output);
 }  
 
-/**
- * Use the Arduino PWM function to control the cooler fan in ON/OFF mode.
- */  
 void HeaterController::fan_cooler(int output) {
   digitalWrite(FAN_PIN, (output == OUT_ON) ? HIGH : LOW );
 }
@@ -283,10 +276,29 @@ int HeaterController::tuning_percentage(void) {
 }
 
 bool HeaterController::moisture_door(bool state) {
-  
+  // state control the gate, true when open and false when closed.
   int angle = state ? pstorage.moisture_open_angle() : pstorage.moisture_close_angle();
   
-  // Control del position of the moisture vent door.
+  return moisture_move(angle);
+}
+
+void HeaterController::set_moisture_angle(bool state, int value) {
+  // state control the gate, true when open and false when closed.
+  int angle = state ? pstorage.moisture_open_angle() : pstorage.moisture_close_angle();
+  
+  angle += value;
+
+  if (moisture_move(angle)) {
+    if (state) {
+      pstorage.write_moisture_open_angle(angle);  
+    } else {
+      pstorage.write_moisture_close_angle(angle); 
+    }
+  } 
+}
+
+bool HeaterController::moisture_move(int angle) {
+  // Control the position of the moisture vent door.
   if ((angle >= MOISTURE_DOOR_MIN) && (angle <= MOISTURE_DOOR_MAX)) {
     moisture_servo.write(angle);
     
@@ -294,28 +306,4 @@ bool HeaterController::moisture_door(bool state) {
   }
 
   return false;
-}
-
-void HeaterController::set_moisture_angle(bool state, int value) {
-
-  int angle = state ? pstorage.moisture_open_angle() : pstorage.moisture_close_angle();
-  
-  int new_val = angle + value;
-  
-  if ((new_val >= MOISTURE_DOOR_MIN) && (new_val <= MOISTURE_DOOR_MAX)) {
-    moisture_servo.write(new_val);
-    if (moisture_servo.read() == new_val) {
-      if (state) {
-        pstorage.write_moisture_open_angle(new_val);  
-      } else {
-        pstorage.write_moisture_close_angle(new_val); 
-      }
-    }  
-  } else {
-    if (state) {
-      pstorage.write_moisture_open_angle(moisture_servo.read());  
-    } else {
-      pstorage.write_moisture_close_angle(moisture_servo.read()); 
-    }
-  }
 }
