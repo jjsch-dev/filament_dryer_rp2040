@@ -78,6 +78,7 @@ private:
   ParamStorage& pstorage;
   volatile int counter;
   int last_turns; 
+  int start_turns;
   
   int do_pin;
   bool heater_on;
