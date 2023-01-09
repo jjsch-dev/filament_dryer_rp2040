@@ -45,7 +45,7 @@ bool Odometer::begin(callback_odom_start_t c_start, callback_odom_stop_t c_stop)
 
   odom_start = c_start;
   odom_stop = c_stop;
-  last_turns = get_turns();
+  last_turns = pstorage.odom_turns();
   time_turns_update = millis();
   return true;
 }
@@ -58,14 +58,14 @@ bool Odometer::update(bool pid_on) {
 unsigned long now = millis(); 
 
   if ((pstorage.odom_mode() == ODOM_MODE_START) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
-    if (!pid_on && (last_turns < get_turns())) {
+    if (!pid_on && (last_turns < pstorage.odom_turns())) {
       odom_start();    
     }
   } 
   
   if ((pstorage.odom_mode() == ODOM_MODE_STOP) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
     if (pid_on) {
-      if (last_turns == get_turns()) {
+      if (last_turns == pstorage.odom_turns()) {
         if ((pstorage.odom_minutes() * 60000) <= (now - start_time)) {
           odom_stop();
         }
@@ -81,7 +81,7 @@ unsigned long now = millis();
 }
 
 void Odometer::update_turns(unsigned long now) {
-  last_turns = get_turns();
+  last_turns = pstorage.odom_turns();
 
   /*
    * Updates the number of laps every 10 minutes to avoid exceeding 

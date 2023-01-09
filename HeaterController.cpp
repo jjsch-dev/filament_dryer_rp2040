@@ -52,7 +52,7 @@ HeaterController::HeaterController(int pwm_freq, int pwm_res, float max_bed, Par
   tune_input = 0;
   tune_output = 0;
   tune_setpoint = 50;
-
+  
   // The sample time of the PID has to match that of the tuner, and uses uS as the unit.
   pid_sample_timeout = (tune_test_time_sec * 1000000) / tune_samples;
 }
