@@ -32,7 +32,7 @@
 #include "ParamStorage.h"
 #include "Odometer.h"
 
-#define FIRMWARE_VERSION      "1.0.7"   // Version actual del firmware.
+#define FIRMWARE_VERSION      "1.0.8"   // Version actual del firmware.
 
 #define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 

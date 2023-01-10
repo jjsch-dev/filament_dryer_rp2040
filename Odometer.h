@@ -79,6 +79,7 @@ private:
   volatile int counter;
   int last_turns; 
   int start_turns;
+  bool pulse_detected;
   
   int do_pin;
   bool heater_on;

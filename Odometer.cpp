@@ -39,6 +39,7 @@ Odometer::Odometer(int pin, ParamStorage& storage) :
   p_instance = this;
   time_turns_update = 0;
   start_turns = 0;
+  pulse_detected = false;
 }
 
 bool Odometer::begin(callback_odom_start_t c_start, callback_odom_stop_t c_stop) {
@@ -60,24 +61,31 @@ unsigned long now = millis();
 
   if ((pstorage.odom_mode() == ODOM_MODE_START) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
     /* 
-     * Changed odometer auto-ignition logic to prevent box bumps from triggering it. 
-     * Ten detections in a 10 second window are now required to validate the feature.
+     * Changed odometer auto-on logic to prevent box bumps from activating it. 
+     * Five detections every 100 mS are now required to turn it on.
      */
     if (!pid_on) {
       if (last_turns < pstorage.odom_turns()) {
-        if (start_turns == 0) {
-          reset_timer();
-        }
-        
-        if (start_turns++ >= 10) {
-          odom_start();
-          start_turns = 0;
-        }  
-      } else if (10000 <= (now - start_time)) {
+        pulse_detected = true;  
+      }
+      
+      if (100 <= (now - start_time)) {
         reset_timer(); 
-        start_turns = 0;  
+        if (pulse_detected) {
+          start_turns++;
+          pulse_detected = false;
+        } else {
+          start_turns = 0;  
+        }
       } 
-    } 
+
+      if (start_turns >= 5) {
+        odom_start();
+        start_turns = 0;
+      }  
+    } else {
+      start_turns = 0;   
+    }
   } 
   
   if ((pstorage.odom_mode() == ODOM_MODE_STOP) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
