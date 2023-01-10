@@ -56,3 +56,6 @@ Note: the maximum temperature of the bed is 80 degrees Celsius.
 
 55 degree graph
 ![alt text](images/plot_55.png)
+
+50 degree graph
+![alt text](images/plot_50.png)
