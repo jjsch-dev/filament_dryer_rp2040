@@ -49,7 +49,13 @@ The device can plot the system response over USB using the Arduino serial plotte
 
 The curves below show how humidity drops as time goes by and the temperature rises.
 
-Note: the maximum temperature of the bed is 80 degrees Celsius.
+## Reference
+- **SetPoint** selected temperature for the box (40 to 60° Celsius).
+- **BoxTemp** box temperature.
+- **BoxHumidity** relative humidity of the box.
+- **PWM** power of the heaters (0 to 100%).
+- **BedMax** maximum temperature that heater can reach (80° Celsius).
+- **BedTemp** heaters temperature.
 
 60 degree graph
 ![alt text](images/plot_60.png)
@@ -59,6 +65,9 @@ Note: the maximum temperature of the bed is 80 degrees Celsius.
 
 50 degree graph
 ![alt text](images/plot_50.png)
+
+45 degree graph
+![alt text](images/plot_45.png)
 
 40 degree graph
 ![alt text](images/plot_40.png)
