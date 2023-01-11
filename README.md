@@ -41,6 +41,14 @@ So that the moisture from the filament that evaporates when heating the box goes
 
 To control it, the internal [Servo](https://github.com/earlephilhower/arduino-pico/tree/master/libraries/Servo) library of the arduinopico porting is used, which is based on the PIO of the Rasperry Pi Pico RP2040.
 
+Odometer
+--------
+One of the axes where the filament spool rests has a 6-position encoder so that an optical [Sensor TCRT5000 Infrared Reflection](https://www.aliexpress.com/i/1005004306354385.html) detects its movement.
+
+One of the functions is to turn on the equipment when it detects that the reel has started to rotate and also to turn off the equipment when it no longer rotates in a certain time.
+
+It also counts the number of turns that the spool has given since the last reset, transforming the pulses into turns by setting the diameter of the spool.
+
 Schematic
 ---------
 ![alt text](images/filament_dryer_bb.png)
