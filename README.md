@@ -49,6 +49,20 @@ One of the functions is to turn on the equipment when it detects that the reel h
 
 It also counts the number of turns that the spool has given since the last reset, transforming the pulses into turns by setting the diameter of the spool.
 
+Menu
+----
+The configuration menu maintains a simplified operation from the time when the Arduino Nano was used, which has little RAM and FLASH memory, this is not the case with the Berry.
+
+When the equipment is in information mode it uses three data lines. 
+
+![alt text](images/display_info.png)
+
+- The first on the left shows the current temperature of the box and on the right the set one (0 = device off).
+- The second line shows the remaining operating time.
+- The third is the relative humidity of the box.
+
+To enter the configuration menu you have to press the encoder.
+
 Schematic
 ---------
 ![alt text](images/filament_dryer_bb.png)
