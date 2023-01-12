@@ -99,6 +99,20 @@ Schematic
 
 ![alt text](images/prototype-electronic.png)
 
+Power Supply
+------------
+The main power supply is 12V 20A, which is responsible for powering the heaters, the fan, and through a swicthing reducer supplying the 5V to the Berry Pico, which in turn uses the internal 3.3V regulator to power the CPU and the rest of the electronics.
+
+The 5V step-down is connected to the berry pico with a shotcky diode so that the board can be simultaneously connected to a PC's USB, for example, to get system response via a serial port.
+
+The thermistors are connected to the ADC_REF so that the end of the positive resistive divider matches the reference of the analog-to-digital converter.
+
+To connect the power supply to the equipment, it is recommended to use a 1.5 mm (16AWG) section cable to avoid falls, in this case we use a 70-thread [speaker cable](https://stingerelectronics.com/products/16ga-speaker-wire-white-500-roll). The length should not exceed 2 meters.
+
+If the output voltage can be adjusted, regulate it to 12.5V to compensate for the losses in the connection cable and in the power switch.
+
+![alt text](images/power_supply.png)
+
 System Response
 ---------------
 The device can plot the system response over USB using the Arduino serial plotter.
