@@ -71,6 +71,25 @@ Using the rotary encoder you can explore all the menu items, and when you need t
 
 Use the rotary encoder to modify the value of the element, which can be numeric or a list of options. When the rotary encoder button is pressed, in addition to saving the value in the eeprom memory, editing ends.
 
+## Menu List
+- **Exit** press the button to exit the menu.
+- **Turn** turns the temperature control on/off. 
+- **Temp** select the temperature of the box, the range is from 40 to 60 ° Celcius. 0 = disabled.
+- **Time** select the time that the temperature control operates in hours, the range is from 1 to 72 hours. 0 = disabled.
+- **Tune** On to allow the device to calculate the PID constants and save them to the eeprom. It is advisable to do it without a spool and starting from room temperature.
+- **Therm**  select the number of thermistors that sense the temperature of the heater to prevent it from melting the bed supports (80°Celsius). At least one is recommended.MENU_MODE_EDIT, 90},
+- **Heat** displays the temperature of the heating element. Use the thermistor that is hotter.Displays the temperature of the heating element. Use the thermistor that is hotter.
+- **Odom** activates the functions of turning on (Start) the heating element when the reel rotates, or turning off (Stop) when it has stopped for a while. (Both) activates both functions.
+  - **off** time in minutes that it waits to turn off the heater when the spool stops spinning.
+  - **dia** diameter in millimeters of the spool to convert pulses to turns.
+  - **t** number of turns that the reel has given since the last reset of the counter. Move the encoder to the left to reset it.
+- **Open** position in degrees of the servo when the vent door is open. Typically 90 degrees.
+- **Close** position in degrees of the servo when the vent door is closed. Typically 43 degrees.
+- **Kp** proportional constant of the PID controller.
+- **Ki** integrative constant of the PID controller.
+- **Kd** derivative constant of the PID controller.
+- **Frst** On to restore all parameters to factory.
+- **V** firmware version. 
 
 Schematic
 ---------
