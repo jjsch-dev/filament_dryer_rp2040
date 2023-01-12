@@ -63,6 +63,15 @@ When the equipment is in information mode it uses three data lines.
 
 To enter the configuration menu you have to press the encoder.
 
+![alt text](images/display_enter_cfg.png)
+
+Using the rotary encoder you can explore all the menu items, and when you need to modify a value, you have to press the encoder button, if it is editable the item is marked by inverting the colors.
+
+![alt text](images/display_item_edit.png)
+
+Use the rotary encoder to modify the value of the element, which can be numeric or a list of options. When the rotary encoder button is pressed, in addition to saving the value in the eeprom memory, editing ends.
+
+
 Schematic
 ---------
 ![alt text](images/filament_dryer_bb.png)
