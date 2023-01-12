@@ -32,7 +32,7 @@
 #include "ParamStorage.h"
 #include "Odometer.h"
 
-#define FIRMWARE_VERSION      "1.0.8"   // Version actual del firmware.
+#define FIRMWARE_VERSION      "1.0.9"   // Version actual del firmware.
 
 #define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 
@@ -47,7 +47,7 @@
 #define PWM_FREQUENCY         500       // Set a similar frequency of the Arduino Nano PWM (490Hz).
 #define PWM_RESOLUTION        255       // Set 8 bits for PWM resolution (0-255).
 
-#define MAX_HOURS             48
+#define MAX_HOURS             72
 #define BED_MAX_TEMP          80.00
 
 #define SPLASH_VERSION_TIME   5000      // Version screen display time in mS.
