@@ -38,8 +38,8 @@ The User Interface class uses these libraries to iterate a list of items that ma
 
 Heater
 ------
-To heat the box, two 3D printer beds are used as heating elements with two 15A mofsets that regulate the power with PWM channels.
-To homogenize the environment of the box, a 40x40 mm fan cooler is used that for now turns on at 100%.
+To heat the box, two 3D printer beds are used as heating elements with two [15A mofsets](https://a.aliexpress.com/_mNwI6G6) that regulate the power with PWM channels.
+To homogenize the environment of the box, a [4010 mm fan cooler](https://a.aliexpress.com/_ms9WyQe) is used that for now turns on at 100%.
 
 Moisture Ventilation
 --------------------
