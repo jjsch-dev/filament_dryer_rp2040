@@ -23,8 +23,7 @@ The [HTU21D](https://github.com/devxplained/HTU21D-Sensor-Library) library is us
 
 Protection Sensor
 -----------------
-As the box is printed in Petg, the heater should not exceed 80 degrees, that's why a 100 KHOM at 25ºC and a B of 3950K ±1%
-[thermistor](https://a.aliexpress.com/_m0eyg30) is installed in each heated bed, and to read the temperature the [thermistor](https://github.com/miguel5612/ThermistorLibrary) library is used, which is a port of the firmware reprap.
+As the box is printed in Petg, the heater should not exceed 80 degrees, that's why a [100 KHOM at 25ºC and a B of 3950K ±1% thermistor](https://a.aliexpress.com/_m0eyg30) is installed in each heated bed, and to read the temperature the [thermistor](https://github.com/miguel5612/ThermistorLibrary) library is used, which is a port of the firmware reprap.
 
 Since there is no Arduino module for the thermistors, the divider resistor and filter capacitor are installed on the berry pico board as shown in the picture.
 
@@ -119,6 +118,12 @@ To connect the power supply to the equipment, it is recommended to use a 1.5 mm 
 If the output voltage can be adjusted, regulate it to 12.5V to compensate for the losses in the connection cable and in the power switch.
 
 ![alt text](images/power_supply.png)
+
+Download the firmware in Raspberry Pi Pico
+------------------------------------------
+Hold down the BOOTSEL button while plugging the board into USB. The uf2 file [filament_dryer_rp2040.ino.uf2](https://github.com/jjsch-dev/filament_dryer_rp2040/tree/master/bin/filament_dryer_rp2040.ino.uf2) should then be copied to the USB mass storage device that appears. Once programming of the new firmware is complete the device will automatically reset and be ready for use.
+
+![alt text](images/boot_sel.png)
 
 System Response
 ---------------
