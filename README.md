@@ -113,6 +113,8 @@ The 5V step-down is connected to the berry pico with a shotcky diode so that the
 
 ![alt text](images/power_supply_5v.png)
 
+> Before installing the 5V supply, set the output voltage to 5.5V to compensate for diode drop.
+
 The thermistors are connected to the ADC_REF so that the end of the positive resistive divider matches the reference of the analog-to-digital converter.
 
 To connect the power supply to the equipment, it is recommended to use a 1.5 mm (16AWG) section cable to avoid falls, in this case we use a 70-thread [speaker cable](https://stingerelectronics.com/products/16ga-speaker-wire-white-500-roll). The length should not exceed 2 meters.
