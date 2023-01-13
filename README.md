@@ -172,4 +172,8 @@ Most of the pieces that make up the equipment are manufactured by the FDM method
 
 The lid that contains the vent valve and the bottle for the silica gel are printed in PLA and the fixing magnets are glued with cyanoacrylate to resist deformation due to the plastic's temperature.
 
+The male pneumatic connector can be rotated 180 degrees so that the outlet is horizontal or vertical.
+
+![alt text](images/pneumatic_connector.png)
+
 Click on the link to have a [3D view](https://myhub.autodesk360.com/ue2d9d88e/g/shares/SH35dfcQT936092f0e437288384b4c88dbbf) of the equipment model developed by Manuel Vela.
