@@ -163,3 +163,13 @@ The curves below show how humidity drops as time goes by and the temperature ris
 
 40 degree graph
 ![alt text](images/plot_40.png)
+
+3D Printed Parts
+----------------
+Most of the pieces that make up the equipment are manufactured by the FDM method of 3D printing. Because the equipment can reach 60° Celcius, the box is printed in petg that resists between 5 and 10 degrees more than PLA; and the rollers, having to support the weight of the filament spool, use ABS.
+
+![alt text](images/explode_view.png)
+
+The lid that contains the vent valve and the bottle for the silica gel are printed in PLA and the fixing magnets are glued with cyanoacrylate to resist deformation due to the plastic's temperature.
+
+Click on the link to have a [3D view](https://myhub.autodesk360.com/ue2d9d88e/g/shares/SH35dfcQT936092f0e437288384b4c88dbbf) of the equipment model developed by Manuel Vela.
