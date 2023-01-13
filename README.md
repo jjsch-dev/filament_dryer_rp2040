@@ -123,6 +123,12 @@ If the output voltage can be adjusted, regulate it to 12.5V to compensate for th
 
 ![alt text](images/power_supply.png)
 
+Power Switch and Connector
+--------------------------
+In order for the power supply circuit to support the equipment's current, a [KCD4 ROCKER SWITCH ON OFF DPST 4 PIN](https://a.aliexpress.com/_mMvt3Wa) and [GX Aviation Connector of 4-pin](https://renhotecpro.com/product/gx16-butt-joint-straight-connector-metal-shell) were chosen, to be divided into two circuits of 10A maximum for each heater.
+
+![alt text](images/power_switch.png)
+
 Download the firmware in Raspberry Pi Pico
 ------------------------------------------
 Hold down the BOOTSEL button while plugging the board into USB. The uf2 file [filament_dryer_rp2040.ino.uf2](https://github.com/jjsch-dev/filament_dryer_rp2040/tree/master/bin/filament_dryer_rp2040.ino.uf2) should then be copied to the USB mass storage device that appears. Once programming of the new firmware is complete the device will automatically reset and be ready for use.
