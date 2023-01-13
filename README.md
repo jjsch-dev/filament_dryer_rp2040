@@ -39,7 +39,7 @@ The User Interface class uses these libraries to iterate a list of items that ma
 Heater
 ------
 To heat the box, two 3D printer beds are used as heating elements with two [15A mofsets](https://a.aliexpress.com/_mNwI6G6) that regulate the power with PWM channels.
-To homogenize the environment of the box, a [4010 mm fan cooler](https://a.aliexpress.com/_ms9WyQe) is used that for now turns on at 100%.
+To homogenize the environment of the box, a [4010 fan cooler](https://a.aliexpress.com/_ms9WyQe) is used that for now turns on at 100%.
 
 Moisture Ventilation
 --------------------
@@ -59,7 +59,7 @@ Menu
 ----
 The configuration menu maintains a simplified operation from the time when the Arduino Nano was used, which has little RAM and FLASH memory, this is not the case with the Berry.
 
-When the equipment is in information mode it uses three data lines. 
+When the device is in information mode, it displays three lines of data. 
 
 ![alt text](images/display_info.png)
 
