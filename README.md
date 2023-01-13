@@ -125,7 +125,7 @@ If the output voltage can be adjusted, regulate it to 12.5V to compensate for th
 
 Power Switch and Connector
 --------------------------
-In order for the connection to support the current consumed by the equipment, a [KCD4 ROCKER SWITCH ON OFF DPST 4 PIN](https://a.aliexpress.com/_mMvt3Wa) and [GX Aviation Connector of 4-pin](https://renhotecpro.com/product/gx16-butt-joint-straight-connector-metal-shell) were chosen, to be divided into two circuits of 10A maximum, (one for each heater).
+In order for the wiring to support the power consumed by the equipment, a [KCD4 ROCKER SWITCH ON OFF DPST 4 PIN](https://a.aliexpress.com/_mMvt3Wa) and a [4-pin GX Aviation Connector](https://renhotecpro.com/product/gx16-butt-joint-straight-connector-metal-shell) were chosen, to divide into two 10A maximum circuits (one for each heater).
 
 ![alt text](images/power_switch.png)
 
