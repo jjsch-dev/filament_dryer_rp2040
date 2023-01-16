@@ -47,6 +47,24 @@ So that the moisture from the filament that evaporates when heating the box goes
 
 To control it, the internal [Servo](https://github.com/earlephilhower/arduino-pico/tree/master/libraries/Servo) library of the arduinopico porting is used, which is based on the PIO of the Rasperry Pi Pico RP2040.
 
+- The valve is made up of three parts: a rectangular hole in the box cover with a 45-degree chamfer to increase the contact surface, the valve that has a 0.2 mm offset, and a post that, in addition to being the stop, supports the magnet that brings the door to the closed position.
+
+![alt text](images/valve_parts.png)
+
+![alt text](images/valve_cap.png)
+
+- When the servo arm moves down and stops pushing on the valve, the magnets attract each other and create a force of approximately 300 grams to close the vent.
+
+![alt text](images/valve_close.png)
+
+- To open the valve, the servo moves the arm approximately 45 degrees, it should be noted that the servo makes the most effort at the beginning, and the plastic gear version can make a torque of 1.5 kg per centimeter.
+
+![alt text](images/valve_open.png)
+
+- The servo arm is a combined part between 3D printing and injection that is sold with the kit. This is because in addition to the fact that the shaft rack is difficult to print, heat easily warps common printed plastics.
+
+![alt text](images/valve_servo.png)
+
 Odometer
 --------
 One of the axes where the filament spool rests has a 6-position encoder so that an optical [Sensor TCRT5000 Infrared Reflection](https://www.aliexpress.com/i/1005004306354385.html) detects its movement.
@@ -71,7 +89,7 @@ Odometer sensitivity adjustment
 -------------------------------
 In order for the TTL output (D0) of the odometer sensor to change when the roller is moved (from white to black and vice versa), the comparator sensitivity must be adjusted with the potentiometer.
 
-- Use an allen key to unscrew the cover on the back of the box and insert a screwdriver until it contacts the potentiometer.
+- Use an allen key to unscrew the cap on the back of the box and insert a screwdriver until it contacts the potentiometer.
 
 ![alt text](images/unscrew_odometer_cap.png)
 
