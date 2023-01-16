@@ -55,6 +55,18 @@ One of the functions is to turn on the equipment when it detects that the reel h
 
 It also counts the number of turns that the spool has given since the last reset, transforming the pulses into turns by setting the diameter of the spool.
 
+Spool rollers
+-------------
+The rollers where the spool rests are made up of two parts: a threaded bar M8 * 95mm that gives resistance to torsion and an ABS cover that positions them. In order for the spool rotate as smoothly as possible, the axis is supported by two 608 ZZ bearings.
+
+![alt text](images/spool_rollers_parts.png)
+
+The two ABS covers are different, the used for the optical encoder has three parts, two of a light color (gray or white) and one in black so that the contrast is as high as possible. The second cover is formed by two equal pieces and the color is indistinct.
+
+![alt text](images/spool_rollers_assembly.png)
+
+>The ASB covers are threaded so that they are taut when adjusted.
+
 Menu
 ----
 The configuration menu maintains a simplified operation from the time when the Arduino Nano was used, which has little RAM and FLASH memory, this is not the case with the Berry.
