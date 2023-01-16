@@ -67,6 +67,26 @@ The two ABS covers are different: the used for the optical encoder has three par
 
 >The ABS covers are threaded so that they are taut when adjusted.
 
+Odometer sensitivity adjustment
+-------------------------------
+In order for the TTL output (D0) of the odometer sensor to detect changes (white to black and vice versa), the sensitivity of the comparator must be adjusted by adjusting the potentiometer.
+
+- Use an allen key to unscrew the cover on the back of the box and insert a screwdriver until it contacts the potentiometer.
+
+![alt text](images/unscrew_odometer_cap.png)
+
+- Turn the potentiometer until the sensor status indicator turns off.
+
+![alt text](images/odometer_sensor_off.png)
+
+- Rotate the roller by hand until it turns back on, repeat this operation until you are sure the sensor detects transitions from white to black.
+
+![alt text](images/odometer_sensor_off.png)
+
+Go to the setup menu to verify that the turns counter (t) increases as the reel rotates.
+
+![alt text](images/odometer_turns.png)
+
 Menu
 ----
 The configuration menu maintains a simplified operation from the time when the Arduino Nano was used, which has little RAM and FLASH memory, this is not the case with the Berry.
