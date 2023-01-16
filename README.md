@@ -57,15 +57,15 @@ It also counts the number of turns that the spool has given since the last reset
 
 Spool rollers
 -------------
-The rollers where the spool rests are made up of two parts: a threaded bar M8 * 95mm that gives resistance to torsion and an ABS cover that positions them. In order for the spool rotate as smoothly as possible, the axis is supported by two 608 ZZ bearings.
+The rollers where the spool rests are made up of two parts: a threaded bar M8 * 95mm that gives resistance to deformation by temperature and an ABS cover that positions them. In order for the spool to rotate as smoothly as possible, the axis is supported by two 608 ZZ bearings.
 
 ![alt text](images/spool_rollers_parts.png)
 
-The two ABS covers are different, the used for the optical encoder has three parts, two of a light color (gray or white) and one in black so that the contrast is as high as possible. The second cover is formed by two equal pieces and the color is indistinct.
+The two ABS covers are different: the used for the optical encoder has three parts, two of a light color (silver or white) and one in black so that the contrast is as high as possible. The second cover is formed by two equal pieces and the color is indistinct.
 
 ![alt text](images/spool_rollers_assembly.png)
 
->The ASB covers are threaded so that they are taut when adjusted.
+>The ABS covers are threaded so that they are taut when adjusted.
 
 Menu
 ----
