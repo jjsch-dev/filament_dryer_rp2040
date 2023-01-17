@@ -90,7 +90,7 @@ Install the arm on the servo
 
 ![alt text](images/arm_servo_open.png)
 
-- To adjust the positions, use the menu (close/open) to modify the opening and closing angles, pay special attention that in the open position the valve has play and does not touch the magnet post so that the servo does not get stuck with force and be hot
+- To adjust the positions use the menu (close/open) to modify the opening and closing angles, pay special attention that in the **open** position the valve has play and does not touch the magnet post, and in the **close** position it does not touch the valve so the servo doesn't jam hard and get hot. 
 
 ![alt text](images/arm_servo_adjust.png)
 
