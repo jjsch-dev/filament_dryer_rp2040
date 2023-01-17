@@ -65,6 +65,35 @@ To control it, the internal [Servo](https://github.com/earlephilhower/arduino-pi
 
 ![alt text](images/valve_servo.png)
 
+Install the arm on the servo
+----------------------------
+
+![alt text](images/arm_servo_parts.png)
+
+- Once the electronics of the equipment have been assembled and the firmware downloaded, connect it to the USB and select turn off the equipment in the menu so that the servo turns to the closed position.
+
+![alt text](images/arm_servo_off.png)
+
+- Insert the lever that comes with the servo kit more or less at 95° with respect to the vertical of the drawer as shown in the figure. This position can be adjusted from the menu and its function is that it does not make contact with the valve so, in addition to being closed, it does not consume current.
+
+![alt text](images/arm_servo_abs.png)
+
+- Insert the PETG printed lever and use the long screw that comes with the kit to attach the parts to the servo shaft.
+
+![alt text](images/arm_servo_close.png)
+
+- Go to the menu and turn on the equipment.
+
+![alt text](images/arm_servo_on.png)
+
+- The arm should go up as the image shows.
+
+![alt text](images/arm_servo_open.png)
+
+- To adjust the positions, use the menu (close/open) to modify the opening and closing angles, pay special attention that in the open position the valve has play and does not touch the magnet post so that the servo does not get stuck with force and be hot
+
+![alt text](images/arm_servo_adjust.png)
+
 Odometer
 --------
 One of the axes where the filament spool rests has a 6-position encoder so that an optical [Sensor TCRT5000 Infrared Reflection](https://www.aliexpress.com/i/1005004306354385.html) detects its movement.
