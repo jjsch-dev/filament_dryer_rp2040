@@ -74,7 +74,7 @@ Install the arm on the servo
 
 ![alt text](images/arm_servo_off.png)
 
-- Insert the lever that comes with the servo kit more or less at 95° with respect to the vertical of the drawer as shown in the figure. This position can be adjusted from the menu and its function is that it does not make contact with the valve so, in addition to being closed, it does not consume current.
+- Insert the lever that comes with the servo kit more or less at 95° with respect to the vertical of the drawer as shown in the figure. 
 
 ![alt text](images/arm_servo_abs.png)
 
