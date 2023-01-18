@@ -51,7 +51,7 @@ The user interface is based on a 0.96-inch OLED screen that displays text and us
 
 ![alt text](images/oled_display.png)
 
-For user input, we use a rotary encoder and the [EncoderButton]() library, which depends on the [Encoder Library](https://www.pjrc.com/teensy/td_libs_Encoder.html) and the [EncoderLibrary Bounce2](https ://github.com/thomasfredericks/Bounce2) libraries.
+For user input, we use a rotary encoder and the [EncoderButton](https://github.com/Stutchbury/EncoderButton) library, which depends on the [Encoder Library](https://www.pjrc.com/teensy/td_libs_Encoder.html) and the [EncoderLibrary Bounce2](https://github.com/thomasfredericks/Bounce2) libraries.
 
 ![alt text](images/rotary_encoder.png)
 
