@@ -15,11 +15,9 @@ As the equipment has many parts, an assembly manual in this instance of the proj
 
 > All the magnets, except the pressure, (the holes have almost no play) must be glued with cyanoacrylate so that the temperature does not move them.
 
-> The cap handle and optical sensor bracket screws are parkers, the rest are M2*5 or M3*10/12.
+> The cap handle and optical sensor bracket screws are parkers, the rest are M2x5 or M3x10/12.
 
-<video width="320" height="240" controls>
-  <source src="/images/assembly_video.mp4" type="video/mp4">
-</video>
+https://user-images.githubusercontent.com/55675185/213210009-817704a3-4283-4df1-9f83-4bf9835dcf00.mp4
 
 Temperature control
 -------------------
