@@ -17,7 +17,7 @@ As the equipment has many parts, an assembly manual in this instance of the proj
 
 > The cap handle and optical sensor bracket screws are parkers, the rest are M2x5 or M3x10/12.
 
-https://user-images.githubusercontent.com/55675185/213217917-36f8ca33-fdc1-4a98-8f2e-83bfd3cb0924.mp4
+https://user-images.githubusercontent.com/55675185/213236978-26854887-6648-46aa-a964-80c38ac183d2.mp4
 
 Temperature control
 -------------------
@@ -31,9 +31,13 @@ The main sensor of the equipment that is used to obtain the humidity and tempera
 
 The [HTU21D](https://github.com/devxplained/HTU21D-Sensor-Library) library is used to obtain temperature compensated humidity through one of the I2C ports.
 
+![alt text](images/temp_humidity_sensor.png)
+
 Protection Sensor
 -----------------
 As the box is printed in Petg, the heater should not exceed 80 degrees, that's why a [100 KHOM at 25ºC and a B of 3950K ±1% thermistor](https://a.aliexpress.com/_m0eyg30) is installed in each heated bed, and to read the temperature the [thermistor](https://github.com/miguel5612/ThermistorLibrary) library is used, which is a port of the firmware reprap.
+
+![alt text](images/thermistor_mounted.png)
 
 Since there is no Arduino module for the thermistors, the divider resistor and filter capacitor are installed on the berry pico board as shown in the picture.
 
@@ -41,19 +45,33 @@ Since there is no Arduino module for the thermistors, the divider resistor and f
 
 User Interfase
 --------------
-The user interface is based on a 0.96-inch screen for presentation and a rotary encoder for input.
-To control the display via I2C the [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306) library is used, and for the rotary encoder the [EncoderButton]() library, which depends on the [Encoder library](https://www.pjrc.com/teensy/td_libs_Encoder.html) and [Bounce2 library](https://github.com/thomasfredericks/Bounce2) libraries.
+The user interface is based on a 0.96-inch OLED screen that displays text and uses the [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306) library through an I2C interface.
 
-The User Interface class uses these libraries to iterate a list of items that make up the configuration menu, and with callback functions (get/set/edit/end edit/exit) it communicates with the application.
+![alt text](images/oled_display.png)
+
+For user input, we use a rotary encoder and the [EncoderButton]() library, which depends on the [Encoder Library](https://www.pjrc.com/teensy/td_libs_Encoder.html) and the [EncoderLibrary Bounce2](https ://github.com/thomasfredericks/Bounce2) libraries.
+
+![alt text](images/rotary_encoder.png)
 
 Heater
 ------
-To heat the box, two 3D printer beds are used as heating elements with two [15A mofsets](https://a.aliexpress.com/_mNwI6G6) that regulate the power with PWM channels.
+To heat the box, two 3D printer beds are used as heating elements.
+
+![alt text](images/heat_bed.png)
+
+And two [15A mofsets](https://a.aliexpress.com/_mNwI6G6) that regulate the power with PWM channels.
+
+![alt text](images/mosfet.png)
+
 To homogenize the environment of the box, a [4010 fan cooler](https://a.aliexpress.com/_ms9WyQe) is used that for now turns on at 100%.
+
+![alt text](images/fan_cooler.png)
 
 Moisture Ventilation
 --------------------
 So that the moisture from the filament that evaporates when heating the box goes outside, a ventilation valve is incorporated that is activated by an [Servo SG92](https://www.adafruit.com/product/169).
+
+![alt text](images/servo.png)
 
 To control it, the internal [Servo](https://github.com/earlephilhower/arduino-pico/tree/master/libraries/Servo) library of the arduinopico porting is used, which is based on the PIO of the Rasperry Pi Pico RP2040.
 
@@ -107,6 +125,11 @@ Install the arm on the servo
 Odometer
 --------
 One of the axes where the filament spool rests has a 6-position encoder so that an optical [Sensor TCRT5000 Infrared Reflection](https://www.aliexpress.com/i/1005004306354385.html) detects its movement.
+
+![alt text](images/optical_sensor_back.png)
+
+![alt text](images/optical_sensor_front.png)
+
 
 One of the functions is to turn on the equipment when it detects that the reel has started to rotate and also to turn off the equipment when it no longer rotates in a certain time.
 
