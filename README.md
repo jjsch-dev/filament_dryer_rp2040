@@ -219,7 +219,11 @@ Schematic
 
 ![alt text](images/filament_dryer_schem.png)
 
+Assembly of electronics version one
 ![alt text](images/prototype-electronic.png)
+
+Assembly of electronics version two
+![alt text](images/prototype-electronic_v2.png)
 
 Power Supply
 ------------
