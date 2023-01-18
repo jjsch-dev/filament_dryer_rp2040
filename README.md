@@ -43,6 +43,8 @@ Since there is no Arduino module for the thermistors, the divider resistor and f
 
 ![alt text](images/thermistor_berry.png)
 
+> Note: For now the thermistor library does not include the pull request that adds compatibility with arduinopico, so use this [link](https://github.com/jjsch-dev/ThermistorLibrary) to download the modified one.
+
 User Interfase
 --------------
 The user interface is based on a 0.96-inch OLED screen that displays text and uses the [Adafruit_SSD1306](https://github.com/adafruit/Adafruit_SSD1306) library through an I2C interface.
@@ -52,6 +54,8 @@ The user interface is based on a 0.96-inch OLED screen that displays text and us
 For user input, we use a rotary encoder and the [EncoderButton]() library, which depends on the [Encoder Library](https://www.pjrc.com/teensy/td_libs_Encoder.html) and the [EncoderLibrary Bounce2](https ://github.com/thomasfredericks/Bounce2) libraries.
 
 ![alt text](images/rotary_encoder.png)
+
+> Note: For now the Encoder library does not include the pull request that adds compatibility with arduinopico, so use this [link](https://github.com/jjsch-dev/Encoder) to download the modified one.
 
 Heater
 ------
