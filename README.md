@@ -17,7 +17,7 @@ As the equipment has many parts, an assembly manual in this instance of the proj
 
 > The cap handle and optical sensor bracket screws are parkers, the rest are M2*5 or M3*10/12.
 
-<video src='/images/assembly_vide.mp4'/> 
+![](/images/assembly_vide.mp4)
 
 Temperature control
 -------------------
