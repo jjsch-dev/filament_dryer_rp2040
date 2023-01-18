@@ -9,6 +9,16 @@ Due to limitations in the RAM memory of the Arduino Nano, the Raspberry Pi Pico 
 
 ![alt text](images/prototype-up.png)
 
+Assembly Video
+--------------
+As the equipment has many parts, an assembly manual in this instance of the project becomes complex to produce, so we decided to generate a video with the CAD where, in addition to seeing the dehumidifier explode, the steps and fixing methods used are shown.
+
+> All the magnets, except the pressure, (the holes have almost no play) must be glued with cyanoacrylate so that the temperature does not move them.
+
+> The cap handle and optical sensor bracket screws are parkers, the rest are M2*5 or M3*10/12.
+
+<video src='/images/assembly_vide.mp4'/> 
+
 Temperature control
 -------------------
 The temperature control module is based on the [QuickPID](https://github.com/Dlloydev/QuickPID) library which has an advanced anti-windup mode which prevents deep saturation and reduces overshoot.
