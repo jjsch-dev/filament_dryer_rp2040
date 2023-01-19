@@ -11,9 +11,9 @@ Due to limitations in the RAM memory of the Arduino Nano, the Raspberry Pi Pico 
 
 Assembly Video
 --------------
-As the equipment has many parts, an assembly manual in this instance of the project becomes complex to produce, so we decided to generate a video with the CAD where, in addition to seeing the dehumidifier explode, the steps and fixing methods used are shown.
+As the equipment has many parts, an assembly manual in this instance of the project becomes slow to produce, so we decided from Fusion 360 to generate a video where, in addition to seeing the dehumidifier explode, the assembly steps, screws and magnets are shown.
 
-> All the magnets, except the pressure, (the holes have almost no play) must be glued with cyanoacrylate so that the temperature does not move them.
+> All the magnets are placed under pressure (the holes have almost no play) and they must also be glued with cyanoacrylate so that the temperature does not loosen them.
 
 > The cap handle and optical sensor bracket screws are parkers, the rest are M2x5 or M3x10/12.
 
