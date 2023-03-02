@@ -40,6 +40,8 @@ TempSensors::TempSensors(unsigned long timeout_ms, ParamStorage& storage) :
   bed_left_temp = 0;
   bed_right_temp = 0; 
   sensor_id = 0;
+
+  calib_factor = 0.934250252;
 }
  
 bool TempSensors::begin() {
@@ -89,11 +91,11 @@ unsigned long now = millis();
       break;
       
       case 1:
-        bed_left_temp = bed_left_therm.analog2temp(); 
+        bed_left_temp = bed_left_therm.analog2temp() * pstorage.calib_factor_therm_1(); 
       break;
       
       case 2:
-        bed_right_temp = bed_right_therm.analog2temp(); 
+        bed_right_temp = bed_right_therm.analog2temp() * pstorage.calib_factor_therm_2(); 
       break;
       
       default:
@@ -136,4 +138,25 @@ void TempSensors::set_therms(int count) {
 
 int TempSensors::get_therms(void) {
   return pstorage.therms();  
+}
+
+bool TempSensors::calib_therms(void) {
+  
+  if (sht.measure()) {
+    box_temp = sht.getTemperature();
+    humidity = sht.getHumidity();
+
+    bed_left_temp = bed_left_therm.analog2temp();
+    bed_right_temp = bed_right_therm.analog2temp();
+    
+    pstorage.write_calib_factor_therm_1(box_temp / bed_left_temp); 
+    pstorage.write_calib_factor_therm_2(box_temp / bed_right_temp); 
+        
+    bed_left_temp *= pstorage.calib_factor_therm_1(); 
+    bed_right_temp *= pstorage.calib_factor_therm_2(); 
+
+    return true;
+  }
+
+  return false;
 }

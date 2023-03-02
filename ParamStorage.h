@@ -40,6 +40,8 @@
 #define ADDRESS_ODOM_DIAMETER   ADDRESS_ODOM_TURNS + sizeof(int)
 #define ADDRESS_MOISTURE_CLOSE  ADDRESS_ODOM_DIAMETER + sizeof(int)
 #define ADDRESS_MOISTURE_OPEN   ADDRESS_MOISTURE_CLOSE + sizeof(int)
+#define ADDRESS_CALIB_THERM_1   ADDRESS_MOISTURE_OPEN + sizeof(int)   
+#define ADDRESS_CALIB_THERM_2   ADDRESS_CALIB_THERM_1 + sizeof(float) 
 
 class ParamStorage  
 {
@@ -48,7 +50,8 @@ public:
                int setpoint, int hours, int odom_mode, 
                int odom_minutes, int odom_turns, 
                int odom_diameter, int moisture_close_angle, 
-               int moisture_open_angle);
+               int moisture_open_angle, float calib_factor_therm_1, 
+               float calib_factor_therm_2);
   ~ParamStorage() {};
   
   bool begin();
@@ -64,6 +67,8 @@ public:
   int   odom_diameter(void);
   int   moisture_close_angle(void);
   int   moisture_open_angle(void);
+  float calib_factor_therm_1(void);
+  float calib_factor_therm_2(void);
   
   float read_kp(void);
   float read_ki(void);
@@ -77,6 +82,8 @@ public:
   int   read_odom_diameter(void);
   int   read_moisture_close_angle(void);
   int   read_moisture_open_angle(void);
+  float read_calib_factor_therm_1(void);
+  float read_calib_factor_therm_2(void);
   
   void write_pid_const(float kp, float ki, float kd);
   void write_therms(int therms);
@@ -88,6 +95,8 @@ public:
   void write_odom_diameter(int diam);
   void write_moisture_close_angle(int angle);
   void write_moisture_open_angle(int angle);
+  void write_calib_factor_therm_1(float factor);
+  void write_calib_factor_therm_2(float factor);
   
   void save(void);
   
@@ -107,5 +116,8 @@ private:
   int _odom_diameter;
   int _moisture_close_angle;
   int _moisture_open_angle;
+  float _calib_factor_therm_1; // Calibration factor for thermistor one
+  float _calib_factor_therm_2; // Calibration factor for thermistor two
+  
   int magic_number;
 };

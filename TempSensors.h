@@ -32,16 +32,17 @@
 
 #include "ParamStorage.h"
 
-#define SHT_WIRE              Wire
-#define SHT_SDA_PIN           0
-#define SHT_SCL_PIN           1
-#define HTU21D_ADDR           0x40
+#define SHT_WIRE                    Wire
+#define SHT_SDA_PIN                 0
+#define SHT_SCL_PIN                 1
+#define HTU21D_ADDR                 0x40
 
-#define BED_LEFT_THERM_PIN    A0
-#define BED_RIGHT_THERM_PIN   A1
-#define SMPS_MODE_PIN         23  // GPIO23
+#define BED_LEFT_THERM_PIN          A0
+#define BED_RIGHT_THERM_PIN         A1
+#define SMPS_MODE_PIN               23  // GPIO23
 
-#define THERMS_DEFAULT        2   // By default, the left and right thermistors are enabled.
+#define THERMS_DEFAULT              2   // By default, the left and right thermistors are enabled.
+#define THERM_CALIB_FACTOR_DEFAULT  0.934250252
 
 class TempSensors  
 {
@@ -58,6 +59,7 @@ public:
 
   void set_therms(int count);
   int get_therms(void);
+  bool calib_therms(void);
   
 private:
   HTU21D          sht;
@@ -69,8 +71,11 @@ private:
   float           humidity;
   float           bed_left_temp;
   float           bed_right_temp;
-   
+
+  float           calib_factor; // Calibration factor for thermistor
+  
   unsigned long   last_sample;
   unsigned long   sample_timeout;
   int             sensor_id;
+  
 };

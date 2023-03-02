@@ -32,18 +32,19 @@
 #define MNU_REMAINING_TIME_ID       3
 #define MNU_TUNE_ENABLE_ID          4
 #define MNU_THERMISTORS_ID          5
-#define MNU_HEATER_TEMP_ID          6
-#define MNU_ODOM_MODE_ID            7
-#define MNU_ODOM_MINUTES_ID         8
-#define MNU_ODOM_DIAMETER_ID        9
-#define MNU_ODOM_TURNS_ID           10
-#define MNU_MOISTURE_OPEN_ID        11
-#define MNU_MOISTURE_CLOSE_ID       12
-#define MNU_KP_ID                   13
-#define MNU_KI_ID                   14
-#define MNU_KD_ID                   15
-#define MNU_FACTORY_RESET_ID        16
-#define MNU_FIRMWARE_VERSION_ID     17
+#define MNU_CALIB_THERMISTORS_ID    6
+#define MNU_HEATER_TEMP_ID          7
+#define MNU_ODOM_MODE_ID            8
+#define MNU_ODOM_MINUTES_ID         9
+#define MNU_ODOM_DIAMETER_ID        10
+#define MNU_ODOM_TURNS_ID           11
+#define MNU_MOISTURE_OPEN_ID        12
+#define MNU_MOISTURE_CLOSE_ID       13
+#define MNU_KP_ID                   14
+#define MNU_KI_ID                   15
+#define MNU_KD_ID                   16
+#define MNU_FACTORY_RESET_ID        17
+#define MNU_FIRMWARE_VERSION_ID     18
 
 menu_item_t menu_list[] = {
   {"Exit",    MENU_MODE_EXIT, 80},
@@ -52,6 +53,7 @@ menu_item_t menu_list[] = {
   {"Time:",   MENU_MODE_EDIT, 80}, 
   {"Tune:",   MENU_MODE_EDIT, 80},
   {"Therm:",  MENU_MODE_EDIT, 90},
+  {" cali:",  MENU_MODE_EDIT, 90},
   {"Heat:",   MENU_MODE_INFO, 80},
   {"Odom:",   MENU_MODE_EDIT, 80},
   {" off:",   MENU_MODE_EDIT, 90},

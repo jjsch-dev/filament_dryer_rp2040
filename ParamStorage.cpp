@@ -31,7 +31,8 @@ ParamStorage::ParamStorage(float kp, float ki, float kd, int therms,
                            int setpoint, int hours, int odom_mode, 
                            int odom_minutes, int odom_turns,
                            int odom_diameter, int moisture_close_angle,
-                           int moisture_open_angle) {
+                           int moisture_open_angle, float calib_factor_therm_1, 
+                           float calib_factor_therm_2) {
   _kp = kp;
   _ki = ki;
   _kd = kd;
@@ -44,6 +45,8 @@ ParamStorage::ParamStorage(float kp, float ki, float kd, int therms,
   _odom_diameter = odom_diameter;
   _moisture_close_angle = moisture_close_angle;
   _moisture_open_angle = moisture_open_angle;
+  _calib_factor_therm_1 = calib_factor_therm_1;
+  _calib_factor_therm_2 = calib_factor_therm_2;
 }
 
 bool ParamStorage::begin(void) {
@@ -62,6 +65,8 @@ bool ParamStorage::begin(void) {
     read_odom_diameter();
     read_moisture_close_angle();
     read_moisture_open_angle();
+    read_calib_factor_therm_1();
+    read_calib_factor_therm_2();
     return true;
   } 
   
@@ -126,6 +131,14 @@ int ParamStorage::moisture_open_angle(void) {
   return _moisture_open_angle;
 }
 
+float ParamStorage::calib_factor_therm_1(void) {
+  return _calib_factor_therm_1;
+}
+
+float ParamStorage::calib_factor_therm_2(void) {
+  return _calib_factor_therm_2;
+}
+
 float ParamStorage::read_kp(void) {
   EEPROM.get(ADDRESS_KP, _kp);
   return _kp;
@@ -186,6 +199,16 @@ int ParamStorage::read_moisture_open_angle(void) {
   return _moisture_open_angle;
 }
 
+float ParamStorage::read_calib_factor_therm_1(void) {
+  EEPROM.get(ADDRESS_CALIB_THERM_1, _calib_factor_therm_1);
+  return _calib_factor_therm_1;
+}
+
+float ParamStorage::read_calib_factor_therm_2(void) {
+  EEPROM.get(ADDRESS_CALIB_THERM_2, _calib_factor_therm_2);
+  return _calib_factor_therm_2;
+}
+
 void ParamStorage::write_pid_const(float kp, float ki, float kd) {
   _kp = kp;
   _ki = ki;
@@ -238,6 +261,16 @@ void ParamStorage::write_moisture_close_angle(int angle) {
 void ParamStorage::write_moisture_open_angle(int angle) {
   _moisture_open_angle = angle;
   EEPROM.put(ADDRESS_MOISTURE_OPEN, angle);
+}
+
+void ParamStorage::write_calib_factor_therm_1(float factor) {
+  _calib_factor_therm_1 = factor;
+  EEPROM.put(ADDRESS_CALIB_THERM_1, factor);
+}
+
+void ParamStorage::write_calib_factor_therm_2(float factor) {
+  _calib_factor_therm_2 = factor;
+  EEPROM.put(ADDRESS_CALIB_THERM_2, factor);
 }
 
 /*

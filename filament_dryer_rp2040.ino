@@ -32,7 +32,7 @@
 #include "ParamStorage.h"
 #include "Odometer.h"
 
-#define FIRMWARE_VERSION      "1.0.9"   // Version actual del firmware.
+#define FIRMWARE_VERSION      "1.0.10"  // Version actual del firmware.
 
 #define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 
@@ -55,12 +55,14 @@
 uint8_t           refresh_display = 10;
 unsigned long     splash_timer;
 bool              factory_reset = false;
+bool              calib_thermistors = false;
 
 ParamStorage      param_storage(KP_DEFAULT, KI_DEFAULT, KD_DEFAULT, THERMS_DEFAULT,
                                 SETPOINT_DEFAULT, TIME_DEFAULT, ODOM_MODE_DEFAULT, 
                                 ODOM_MINUTES_DEFAULT, ODOM_TURNS_DEFAULT, 
                                 ODOM_DIAMETER_DEFAULT, MOISTURE_CLOSE_DEFAULT, 
-                                MOISTURE_OPEN_DEFAULT);
+                                MOISTURE_OPEN_DEFAULT, THERM_CALIB_FACTOR_DEFAULT, 
+                                THERM_CALIB_FACTOR_DEFAULT);
 TempSensors       sensors(SAMPLE_TIMEOUT_100MS, param_storage);
 HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP, param_storage);
 RunTimer          timer(MAX_HOURS, param_storage);
@@ -114,6 +116,9 @@ char* callback_menu_get(char* str_buff, int item_id) {
     break;
     case MNU_THERMISTORS_ID:
       sprintf(str_buff, "%d", sensors.get_therms());
+    break;
+    case MNU_CALIB_THERMISTORS_ID:
+      bool_selection(str_buff, calib_thermistors);
     break;
     case MNU_HEATER_TEMP_ID:
       sprintf(str_buff, "%02.0f", max(sensors.bed_left_celcius(), sensors.bed_right_celcius()));
@@ -208,8 +213,18 @@ void callback_menu_end_edit(int item_id) {
         param_storage.write_odom_diameter(ODOM_DIAMETER_DEFAULT);
         param_storage.write_moisture_close_angle(MOISTURE_CLOSE_DEFAULT);
         param_storage.write_moisture_open_angle(MOISTURE_OPEN_DEFAULT);
+        param_storage.write_calib_factor_therm_1(THERM_CALIB_FACTOR_DEFAULT);
+        param_storage.write_calib_factor_therm_2(THERM_CALIB_FACTOR_DEFAULT);
         param_storage.save();  
         heater.set_tunings();
+      }
+    break;
+    case MNU_CALIB_THERMISTORS_ID:
+      if (calib_thermistors) {
+        calib_thermistors = false;
+        if (sensors.calib_therms()) {
+          param_storage.save();  
+        }
       }
     break;
   } 
@@ -244,6 +259,9 @@ bool callback_menu_set(int value, int item_id) {
     break;
     case MNU_THERMISTORS_ID:
       sensors.set_therms(value);
+    break;
+    case MNU_CALIB_THERMISTORS_ID:
+      calib_thermistors = (value > 0) ? true : false;
     break;
     case MNU_FACTORY_RESET_ID:
       factory_reset = (value > 0) ? true : false;
@@ -332,7 +350,7 @@ bool ret_val = (ui.clicks() == 0);
 }
 
 /*
- * Shows the runining information.
+ * Shows the runing information.
  */
 void update_display_info() {
 char buff[100];
@@ -410,6 +428,8 @@ static bool one_time = true;
     Serial.print("Kp: "); Serial.print(param_storage.kp());
     Serial.print(" Ki: "); Serial.print(param_storage.ki());
     Serial.print(" Kd: "); Serial.println(param_storage.kd());
+    Serial.print("Calibration factor for thermistor left: "); Serial.print(param_storage.calib_factor_therm_1());
+    Serial.print(" right: "); Serial.println(param_storage.calib_factor_therm_2());
     Serial.print("Spool turns: "); Serial.println(odometer.get_turns(), 2);
     one_time = false;
   } 
