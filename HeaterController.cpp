@@ -186,6 +186,7 @@ float HeaterController::pid_controller(float box_temp, float bed_temp) {
     case ST_WAIT_BED_TEMP_DROP: 
       if (bed_temp < (max_bed_temp - 5)) {
         pid_status = ST_RUN_PID;
+        pid_output = 0;
         pid.SetMode(pid.Control::automatic);
       }
     break;
