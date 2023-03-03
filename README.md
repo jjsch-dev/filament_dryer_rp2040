@@ -23,7 +23,7 @@ The task of calculating the PID constants is based on the same author's [sTune](
 
 Measurement of the humidity and temperature of the box
 ------------------------------------------------------
-The equipment uses the [SHT21](https://sensirion.com/products/catalog/SHT21/) sensor from Sensirion to measure the humidity and temperature of the box. This sensor can be purchased as a mounted module from [Adafruit](https://www.adafruit.com/product/1899 or other suppliers. To read the data from the sensor, the HTU21D library is used through the I2C port.
+The equipment uses the [SHT21](https://sensirion.com/products/catalog/SHT21/) sensor from Sensirion to measure the humidity and temperature of the box. This sensor can be purchased as a mounted module from [Adafruit](https://www.adafruit.com/product/1899) or other suppliers. To read the data from the sensor, the HTU21D library is used through the I2C port.
 
 ![alt text](images/temp_humidity_sensor.png)
 
