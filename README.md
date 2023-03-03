@@ -199,7 +199,7 @@ Use the rotary encoder to modify the value of the element, which can be numeric 
 - **Turn** turns the temperature control on/off. 
 - **Temp** select the temperature of the box, the range is from 40 to 60 ° Celcius. 0 = disabled.
 - **Time** select temperature control run time in hours, range is from 1 to 72 hours. 0 = disabled.
-- **Tune** On to allow the device to calculate the PID constants and save them to the eeprom. It is advisable to do it without a spool and starting from room temperature.
+- **Tune** On to allow the device to calculate the PID constants and save them to the eeprom. It is advisable to do it with a full spool and starting from room temperature.
 - **Therm**  select the number of thermistors that sense the temperature of the heater to prevent it from melting the bed supports (80°Celsius). At least one is recommended.
   - **cali** calibrate the thermistors to improve their accuracy. It is important to calibrate them when temperatures are stabilized (12 hs OFF) to get better results. 
 - **Heat** displays the temperature of the heating element. Use the thermistor that is hotter.
@@ -226,6 +226,29 @@ Assembly of electronics version one
 
 Assembly of electronics version two
 ![alt text](images/prototype-electronic_v2.png)
+
+A Guide to PID and Auto Tune for Temperature Regulation
+-------------------------------------------------------
+A Guide to PID and Auto Tune for Temperature Regulation
+
+The PID (proportional-integral-derivative controller) is an algorithm that regulates the temperature of the heater according to the filament demand. The auto tune is a process that adjusts the PID constants to optimize the performance of the equipment.
+
+By default, the equipment has some PID constants that allow it to operate, but they are not optimal as they depend on several factors such as:
+
+- The power supply voltage
+- The resistance of the electrical wires
+- The impedance of the heater
+- The air flow that moves the fan
+
+Therefore, it is necessary to run the auto tune menu at least once. To do it correctly, the following conditions must be met:
+
+- The equipment has not been used for a long time and both temperature sensors (box and heater) are equal to room temperature
+
+- A full filament spool is used because it modifies the air flow
+
+When running the auto tune, it is expected that the system reaches a stable temperature without oscillations or overheating. Below is a graph with an unsynchronized system (left) and a synchronized one (right). It can be seen that the unsynchronized system tends to rise very fast in temperature and exceed 80°C when removing box lid. On other hand, synchronized system maintains a more constant and controlled temperature.
+
+![alt text](images/plot_tune_off_open.png)
 
 Power Supply
 ------------
