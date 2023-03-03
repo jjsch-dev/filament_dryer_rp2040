@@ -21,11 +21,9 @@ The temperature control module is based on the [QuickPID](https://github.com/Dll
 
 The task of calculating the PID constants is based on the same author's [sTune](https://github.com/Dlloydev/sTune) library which uses an open-loop PID auto-tuner using a novel s-curve kneepoint test method.
 
-Main Sensor
------------
-The main sensor of the equipment that is used to obtain the humidity and temperature of the box, is the [SHT21](https://sensirion.com/products/catalog/SHT21/) from Sensirion that can be obtained as a mounted module, for example, from [Adafruit](https://www.adafruit.com/product/1899). 
-
-The [HTU21D](https://github.com/devxplained/HTU21D-Sensor-Library) library is used to obtain temperature compensated humidity through one of the I2C ports.
+Measurement of the humidity and temperature of the box
+------------------------------------------------------
+The equipment uses the [SHT21](https://sensirion.com/products/catalog/SHT21/) sensor from Sensirion to measure the humidity and temperature of the box. This sensor can be purchased as a mounted module from [Adafruit](https://www.adafruit.com/product/1899 or other suppliers. To read the data from the sensor, the HTU21D library is used through the I2C port.
 
 ![alt text](images/temp_humidity_sensor.png)
 
