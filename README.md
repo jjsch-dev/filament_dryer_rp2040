@@ -33,9 +33,10 @@ The [HTU21D](https://github.com/devxplained/HTU21D-Sensor-Library) library is us
 
 ![alt text](images/temp_humidity_sensor.png)
 
-Protection Sensor
------------------
-As the box is printed in Petg, the heater should not exceed 80 degrees, that's why a [100 KHOM at 25ºC and a B of 3950K ±1% thermistor](https://a.aliexpress.com/_m0eyg30) is installed in each heated bed, and to read the temperature the [thermistor](https://github.com/miguel5612/ThermistorLibrary) library is used, which is a port of the firmware reprap.
+Thermistors for Over Temperature Protection
+-------------------------------------------
+The heaters can reach very high temperatures that can damage the system or cause a fire. As the box is printed in Petg a protection system was implemented that turns off the heaters when a temperature above a 80 degrees is detected. The system uses two thermistors of [100 KHOM at 25ºC and a B of 3950K ±1% thermistor](https://a.aliexpress.com/_m0eyg30) to measure the temperature of each heater. 
+Thermistors are resistive sensors that vary their value according to temperature. However, due to the deviation of the associated hardware (4k7 resistance and reference voltage of the analog-digital converter), it is necessary to calibrate the thermistors to improve their accuracy. The calibration is done using as reference the temperature of the SHT21 sensor that measures the temperature of the thermal box and has an accuracy of 0.5%. The calibration consists of calculating a factor that is applied to the [thermistor](https://github.com/miguel5612/ThermistorLibrary) library readings to correct their value. This factor is stored in the Arduino’s EEPROM memory for use in future measurements. The calibration can be done from the Calib menu on the LCD when temperatures are stabilized.
 
 ![alt text](images/thermistor_mounted.png)
 
@@ -200,6 +201,7 @@ Use the rotary encoder to modify the value of the element, which can be numeric 
 - **Time** select temperature control run time in hours, range is from 1 to 72 hours. 0 = disabled.
 - **Tune** On to allow the device to calculate the PID constants and save them to the eeprom. It is advisable to do it without a spool and starting from room temperature.
 - **Therm**  select the number of thermistors that sense the temperature of the heater to prevent it from melting the bed supports (80°Celsius). At least one is recommended.
+  - **cali** calibrate the thermistors to improve their accuracy. It is important to calibrate them when temperatures are stabilized (12 hs OFF) to get better results. 
 - **Heat** displays the temperature of the heating element. Use the thermistor that is hotter.
 - **Odom** activates the functions of turning on (Start) the heating element when the reel rotates, or turning off (Stop) when it has stopped for a while. (Both) activates both functions.
   - **off** time in minutes that it waits to turn off the heater when the spool stops spinning. 
