@@ -229,9 +229,7 @@ Assembly of electronics version two
 
 A Guide to PID and Auto Tune for Temperature Regulation
 -------------------------------------------------------
-A Guide to PID and Auto Tune for Temperature Regulation
-
-The PID (proportional-integral-derivative controller) is an algorithm that regulates the temperature of the heater according to the filament demand. The auto tune is a process that adjusts the PID constants to optimize the performance of the equipment.
+The auto tune is a process that adjusts the PID constants to optimize the performance of the equipment.
 
 By default, the equipment has some PID constants that allow it to operate, but they are not optimal as they depend on several factors such as:
 
@@ -246,9 +244,11 @@ Therefore, it is necessary to run the auto tune menu at least once. To do it cor
 
 - A full filament spool is used because it modifies the air flow
 
-When running the auto tune, it is expected that the system reaches a stable temperature without oscillations or overheating. Below is a graph with an unsynchronized system. It can be seen that the unsynchronized system tends to rise very fast in temperature and exceed 80°C when removing box lid. On other hand, synchronized system maintains a more constant and controlled temperature.
+When running the auto tune, it is expected that the system reaches a stable temperature without oscillations or overheating. Below is a graph with an un-tuned system. It can be seen that the it tends to rise very fast in temperature and exceed 80°C when removing box lid. On other hand, synchronized system maintains a more constant and controlled temperature.
 
 ![alt text](images/plot_tune_off_open.png)
+
+> Note: **Off** and **Open** in the graph refer to whether the user turned off the device or removed the lid of the box, respectively.
 
 Power Supply
 ------------
