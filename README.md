@@ -246,7 +246,7 @@ Therefore, it is necessary to run the auto tune menu at least once. To do it cor
 
 - A full filament spool is used because it modifies the air flow
 
-When running the auto tune, it is expected that the system reaches a stable temperature without oscillations or overheating. Below is a graph with an unsynchronized system (left) and a synchronized one (right). It can be seen that the unsynchronized system tends to rise very fast in temperature and exceed 80°C when removing box lid. On other hand, synchronized system maintains a more constant and controlled temperature.
+When running the auto tune, it is expected that the system reaches a stable temperature without oscillations or overheating. Below is a graph with an unsynchronized system. It can be seen that the unsynchronized system tends to rise very fast in temperature and exceed 80°C when removing box lid. On other hand, synchronized system maintains a more constant and controlled temperature.
 
 ![alt text](images/plot_tune_off_open.png)
 
