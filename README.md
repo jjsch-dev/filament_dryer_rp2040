@@ -1,9 +1,5 @@
 # 3D Filament Dryer
-Heats and dries wet filaments to improve print quality and longevity.
- 
-The purpose of this project is to build a dehumidifier with Arduino modules such as humidity and temperature sensors, mosfets and rep rap printer heatbeds.
-
-Due to limitations in the RAM memory of the Arduino Nano, the Raspberry Pi Pico was chosen, which also increases the flash to 2 MBytes.
+The dehumidifier presented in this project uses Arduino modules as humidity and temperature sensors, mosfets and rep rap printer heat beds to heat and dry wet filaments. This improves the quality and durability of the prints. Due to the RAM memory limitations of the Arduino Nano, the Raspberry Pi Pico was chosen which has more RAM and flash memory.
 
 ![alt text](images/prototype-front.png)
 
