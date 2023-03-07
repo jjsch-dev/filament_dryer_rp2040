@@ -1,14 +1,14 @@
 # 3D Filament Dryer
 This project is a dehumidifier for 3D printer filaments that uses Arduino and Raspberry Pi modules. It heats and dries wet filaments to improve the quality and durability of your prints. It also has some cool features such as:
 
--A slow temperature ramp that prevents thermal shock and damage to the filaments.
--A heater temperature monitor that protects the equipment from overheating.
--A spool turn counter that tracks how much filament you have used or left.
--A PWM controller that turns on and off the heater based on the spool rotation speed.
--A PWM cut timer that stops the heater after a certain time period for safety reasons.
--A lid sensor that shuts off the heater when you open the lid to access the filaments.
--An auto-tuning algorithm that adjusts the PID constants for optimal temperature control.
--A USB interface that plots the graph of the system response and allows firmware updates.
+- A slow temperature ramp that prevents thermal shock and damage to the filaments.
+- A heater temperature monitor that protects the equipment from overheating.
+- A spool turn counter that tracks how much filament you have used or left.
+- A PWM controller that turns on and off the heater based on the spool rotation speed.
+- A PWM cut timer that stops the heater after a certain time period for safety reasons.
+- A lid sensor that shuts off the heater when you open the lid to access the filaments.
+- An auto-tuning algorithm that adjusts the PID constants for optimal temperature control.
+- A USB interface that plots the graph of the system response and allows firmware updates.
 
 The project uses a Raspberry Pi Pico instead of an Arduino Nano because it has more RAM and flash memory, which are needed for storing data and running complex algorithms.
 
