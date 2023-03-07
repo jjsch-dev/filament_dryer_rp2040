@@ -1,4 +1,4 @@
-# 3D Filament Dryer
+# DIY Dehumidifier for 3D Printer Filaments
 This project is a dehumidifier for 3D printer filaments that uses Arduino and Raspberry Pi modules. It heats and dries wet filaments to improve the quality and durability of your prints. It also has some cool features such as:
 
 - A slow temperature ramp that prevents thermal shock and damage to the filaments.
