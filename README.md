@@ -104,6 +104,18 @@ To control it, the internal [Servo](https://github.com/earlephilhower/arduino-pi
 
 ![alt text](images/valve_servo.png)
 
+Door lid sensor
+---------------
+The door lid sensor is a mechanical switch with an anti-bounce circuit that detects if the lid of the heater is open or closed. The switch is connected to one of the digital pins of the Arduino board and reads either HIGH or LOW depending on the state of the lid.
+
+![alt_text](images/door_lid_sensor.png)
+
+If the lid is open, the Arduino displays a message on the LCD screen saying “Open Lid” and turns off the heater by setting the output pin of the mofset to LOW. This prevents overheating and potential fire hazards.
+
+If the lid is closed, the Arduino waits for a signal from the operator or the start system that detects the reel’s rotation to resume operation and control the heater using a PID algorithm based on the readings from the temperature and humidity sensor.
+
+![alt_text](images/door_lid_open.png)
+
 Install the arm on the servo
 ----------------------------
 
