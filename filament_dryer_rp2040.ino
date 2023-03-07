@@ -31,8 +31,9 @@
 #include "menu_config.h"
 #include "ParamStorage.h"
 #include "Odometer.h"
+#include "DoorLidSensor.h"
 
-#define FIRMWARE_VERSION      "1.1.0"  // Version actual del firmware.
+#define FIRMWARE_VERSION      "1.1.1"  // Version actual del firmware.
 
 #define SAMPLE_TIMEOUT_100MS  100       // Refresh time for the sensor
 
@@ -68,6 +69,7 @@ HeaterController  heater(PWM_FREQUENCY, PWM_RESOLUTION, BED_MAX_TEMP, param_stor
 RunTimer          timer(MAX_HOURS, param_storage);
 UserInterface     ui(menu_list, sizeof(menu_list));
 Odometer          odometer(TCRT5000_D0_PIN, param_storage);
+DoorLidSensor     lid_sensor(DOOR_LID_PIN, DOOR_LID_DEBOUNCE);
 
 void bool_selection(char* str_buff, bool value) {
   if (value) {
@@ -364,12 +366,17 @@ char buff[100];
   sprintf(buff, "%02.0f/%02d C", sensors.box_celcius(), setpoint);
   ui.display.print(buff);
 
-  if (heater.get_mode() == MODE_RUN_TUNE) {
-    ui.display.setCursor(10, 22);
-    sprintf(buff, "Bed %02.0f-%02.0f", sensors.bed_left_celcius(), sensors.bed_right_celcius());
-  } else {
+  if (lid_sensor.state()) {
     ui.display.setCursor(15, 22);
-    sprintf(buff, "%02d:%02d:%02d", timer.get_hours(), timer.get_minutes(), timer.get_seconds());
+    sprintf(buff, "Lid Open"); 
+  }else {
+    if (heater.get_mode() == MODE_RUN_TUNE) {
+      ui.display.setCursor(10, 22);
+      sprintf(buff, "Bed %02.0f-%02.0f", sensors.bed_left_celcius(), sensors.bed_right_celcius());
+    } else {
+      ui.display.setCursor(15, 22);
+      sprintf(buff, "%02d:%02d:%02d", timer.get_hours(), timer.get_minutes(), timer.get_seconds());
+    }
   }
   ui.display.print(buff); 
   
@@ -380,6 +387,7 @@ char buff[100];
     ui.display.setCursor(27, 42);
     sprintf(buff, "%02.1f %%", sensors.box_humidity());
   }
+
   ui.display.print(buff); 
   
   ui.display.display();                 
@@ -447,6 +455,7 @@ void setup() {
   sensors.begin();
   heater.begin();
   odometer.begin(callback_odom_start, callback_odom_stop);
+  lid_sensor.begin();
   
   splash_timer = millis();
 }
@@ -455,9 +464,11 @@ void loop() {
   show_intro_msg();
 
   int menu_mode = ui.update();
+
+  lid_sensor.update();
   
-  // when the timer in hours expires, it stops the heater.
-  if (timer.update()) {
+  // when the timer in hours expires or the lid is open, it stops the heater.
+  if (timer.update() || lid_sensor.state()) {
     heater.stop();
     timer.reset();
   }
