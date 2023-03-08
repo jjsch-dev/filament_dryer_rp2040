@@ -106,7 +106,7 @@ To control it, the internal [Servo](https://github.com/earlephilhower/arduino-pi
 
 Door lid sensor
 ---------------
-The door lid sensor is a mechanical switch with an anti-bounce circuit that detects if the lid of the heater is open or closed. The switch is connected to one of the digital pins of the Arduino board and reads either HIGH or LOW depending on the state of the lid.
+The door lid sensor is a mechanical switch with an anti-bounce circuit that detects if the lid of the heater is open or closed. The switch is connected to GP22 of the digital pins of the Arduino board and reads either HIGH or LOW depending on the state of the lid.
 
 ![alt_text](images/door_lid_sensor.png)
 
