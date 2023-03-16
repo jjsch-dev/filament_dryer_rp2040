@@ -28,27 +28,32 @@
 #include "Arduino.h"
 #include "ParamStorage.h"
 
-#define TCRT5000_D0_PIN         14  // GPIO14
+#define TCRT5000_D0_PIN           14  // GPIO14
 
-#define ODOM_MODE_DISABLED      0
-#define ODOM_MODE_START         1
-#define ODOM_MODE_STOP          2
-#define ODOM_MODE_BOTH          3
-#define ODOM_MODE_DEFAULT       ODOM_MODE_DISABLED
+#define ODOM_MODE_DISABLED        0
+#define ODOM_MODE_START           1
+#define ODOM_MODE_STOP            2
+#define ODOM_MODE_BOTH            3
+#define ODOM_MODE_DEFAULT         ODOM_MODE_DISABLED
 
-#define ODOM_MINUTES_MIN        1
-#define ODOM_MINUTES_MAX        30
-#define ODOM_MINUTES_DEFAULT    2
+#define ODOM_MINUTES_MIN          1
+#define ODOM_MINUTES_MAX          30
+#define ODOM_MINUTES_DEFAULT      2
 
-#define ODOM_TURNS_DEFAULT      0
+#define ODOM_TURNS_DEFAULT        0
 
-#define ODOM_DIAMETER_MIN       0
-#define ODOM_DIAMETER_MAX       220   // Max 220 mm
-#define ODOM_DIAMETER_DEFAULT   200   // Min 200 mm
+#define ODOM_DIAMETER_MIN         0
+#define ODOM_DIAMETER_MAX         220   // Max 220 mm
+#define ODOM_DIAMETER_DEFAULT     200   // Min 200 mm
 
-#define ODOM_ENCODER_DIAMETER   13.7  // The theoretical diameter is 13.9, the print may differ by a few tenths.
-#define ODOM_PULSES_BY_TURNS    6     // The enconder have 6 pulses by laps.
+#define ODOM_ENCODER_DIAMETER     13.7  // The theoretical diameter is 13.9, the print may differ by a few tenths.
+#define ODOM_PULSES_BY_TURNS      6     // The enconder have 6 pulses by laps.
 
+#define ODOM_DETECTION_TIME_MIN   50
+#define ODOM_DETECTION_TIME_MAX   500
+#define ODOM_DETECTION_COUNT      5
+#define ODOM_60_MINUTES_TO_MILLIS 60000
+        
 typedef void (*callback_odom_start_t)(void);
 typedef void (*callback_odom_stop_t)(void);
 
@@ -79,7 +84,6 @@ private:
   volatile int counter;
   int last_turns; 
   int start_turns;
-  bool pulse_detected;
   
   int do_pin;
   bool heater_on;
@@ -90,4 +94,9 @@ private:
   
   callback_odom_stop_t  odom_stop;
   callback_odom_start_t odom_start;
+
+private:
+  unsigned long last_pulse_time;
+  bool last_pid_state;
+  bool pid_start;
 };

@@ -39,7 +39,10 @@ Odometer::Odometer(int pin, ParamStorage& storage) :
   p_instance = this;
   time_turns_update = 0;
   start_turns = 0;
-  pulse_detected = false;
+
+  last_pulse_time = 0;
+  last_pid_state = false;
+  pid_start = false;
 }
 
 bool Odometer::begin(callback_odom_start_t c_start, callback_odom_stop_t c_stop) {
@@ -58,40 +61,32 @@ void Odometer::reset_timer(void) {
 
 bool Odometer::update(bool pid_on) {
 unsigned long now = millis(); 
+unsigned long elapsed_time = (now - start_time);
 
-  if ((pstorage.odom_mode() == ODOM_MODE_START) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
-    /* 
-     * Changed odometer auto-on logic to prevent box bumps from activating it. 
-     * Five detections every 100 mS are now required to turn it on.
-     */
-    if (!pid_on) {
-      if (last_turns < pstorage.odom_turns()) {
-        pulse_detected = true;  
-      }
-      
-      if (100 <= (now - start_time)) {
-        reset_timer(); 
-        if (pulse_detected) {
-          start_turns++;
-          pulse_detected = false;
-        } else {
-          start_turns = 0;  
-        }
-      } 
+  if (last_pid_state != pid_on) {
+    start_turns = 0;
+    pid_start = false;  
+  }
 
-      if (start_turns >= 5) {
-        odom_start();
-        start_turns = 0;
-      }  
-    } else {
-      start_turns = 0;   
-    }
-  } 
+  last_pid_state = pid_on;
   
-  if ((pstorage.odom_mode() == ODOM_MODE_STOP) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
-    if (pid_on) {
+  if (!pid_on) {
+    if ((pstorage.odom_mode() == ODOM_MODE_START) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
+      /* 
+       * Waits for a single turn to elapse and that it is within the time window (50-500 mS) 
+       * to be considered valid. If it detects two or more turns, it discards them. Prevents 
+       * bumps in the box from generating a false start. Waits 5 pulses to turn on the equipment.
+       */
+      if (pid_start) {
+        odom_start();
+      }
+
+      reset_timer();
+    }
+  } else {  
+    if ((pstorage.odom_mode() == ODOM_MODE_STOP) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
       if (last_turns == pstorage.odom_turns()) {
-        if ((pstorage.odom_minutes() * 60000) <= (now - start_time)) {
+        if ((pstorage.odom_minutes() * ODOM_60_MINUTES_TO_MILLIS) <= elapsed_time) {
           odom_stop();
         }
       } else {
@@ -99,7 +94,7 @@ unsigned long now = millis();
       }
     }
   }
-
+  
   update_turns(now);
 
   return true;
@@ -174,7 +169,25 @@ void Odometer::set_turns(int value) {
 }
 
 void Odometer::handle_isr() {
+unsigned long now = millis();
+ 
   pstorage.write_odom_turns(pstorage.odom_turns() + 1);
+
+  unsigned long elapsed_time = now - last_pulse_time;
+
+  if ((elapsed_time >= ODOM_DETECTION_TIME_MIN) && 
+      (elapsed_time <= ODOM_DETECTION_TIME_MAX)) {
+    start_turns++;
+
+    if (++start_turns >= ODOM_DETECTION_COUNT) {
+      pid_start = true;  
+      start_turns = 0;
+    }
+  } else {
+    start_turns = 0;  
+  }
+    
+  last_pulse_time = now;
 } 
 
  
