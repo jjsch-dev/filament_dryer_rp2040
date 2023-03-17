@@ -479,7 +479,7 @@ void loop() {
   }
 
   // The odometer functions only run in PID mode.
-  odometer.update(heater.get_mode() == MODE_RUN_PID);
+  odometer.update((heater.get_mode() == MODE_RUN_PID), lid_sensor.state());
   
   // Displays the firmware version screen for a seconds or until the encoder is pressed.
   if (!display_version()) {

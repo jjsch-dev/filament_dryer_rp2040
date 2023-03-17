@@ -64,7 +64,7 @@ public:
   ~Odometer() {};
 
   bool begin(callback_odom_start_t c_start, callback_odom_stop_t c_stop);
-  bool update(bool heater_on);
+  bool update(bool heater_on, bool lid_open);
   int get_counter();  
   int get_mode();
   int get_minutes();

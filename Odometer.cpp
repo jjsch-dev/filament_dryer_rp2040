@@ -46,12 +46,14 @@ Odometer::Odometer(int pin, ParamStorage& storage) :
 }
 
 bool Odometer::begin(callback_odom_start_t c_start, callback_odom_stop_t c_stop) {
-  attachInterrupt(do_pin, isr_data, FALLING);
+  pinMode(do_pin, INPUT_PULLUP);
+  attachInterrupt(do_pin, isr_data, FALLING); //RISING); //CHANGE); //FALLING);
 
   odom_start = c_start;
   odom_stop = c_stop;
   last_turns = pstorage.odom_turns();
   time_turns_update = millis();
+
   return true;
 }
 
@@ -59,11 +61,11 @@ void Odometer::reset_timer(void) {
   start_time = millis();
 }
 
-bool Odometer::update(bool pid_on) {
+bool Odometer::update(bool pid_on, bool lid_open) {
 unsigned long now = millis(); 
 unsigned long elapsed_time = (now - start_time);
 
-  if (last_pid_state != pid_on) {
+  if ((last_pid_state != pid_on) || lid_open) {
     start_turns = 0;
     pid_start = false;  
   }
@@ -77,7 +79,7 @@ unsigned long elapsed_time = (now - start_time);
        * to be considered valid. If it detects two or more turns, it discards them. Prevents 
        * bumps in the box from generating a false start. Waits 5 pulses to turn on the equipment.
        */
-      if (pid_start) {
+      if (pid_start && !lid_open) {
         odom_start();
       }
 
@@ -169,25 +171,29 @@ void Odometer::set_turns(int value) {
 }
 
 void Odometer::handle_isr() {
-unsigned long now = millis();
+unsigned long now;
+
+  if (digitalRead(do_pin) == LOW) {
+    now = millis();
  
-  pstorage.write_odom_turns(pstorage.odom_turns() + 1);
-
-  unsigned long elapsed_time = now - last_pulse_time;
-
-  if ((elapsed_time >= ODOM_DETECTION_TIME_MIN) && 
-      (elapsed_time <= ODOM_DETECTION_TIME_MAX)) {
-    start_turns++;
-
-    if (++start_turns >= ODOM_DETECTION_COUNT) {
-      pid_start = true;  
-      start_turns = 0;
+    pstorage.write_odom_turns(pstorage.odom_turns() + 1);
+  
+    unsigned long elapsed_time = now - last_pulse_time;
+  
+    if ((elapsed_time >= ODOM_DETECTION_TIME_MIN) && 
+        (elapsed_time <= ODOM_DETECTION_TIME_MAX)) {
+      start_turns++;
+  
+      if (++start_turns >= ODOM_DETECTION_COUNT) {
+        pid_start = true;  
+        start_turns = 0;
+      }
+    } else {
+      start_turns = 0;  
     }
-  } else {
-    start_turns = 0;  
-  }
     
-  last_pulse_time = now;
+    last_pulse_time = now;
+  }
 } 
 
  
