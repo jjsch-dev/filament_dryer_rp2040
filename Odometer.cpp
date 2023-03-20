@@ -169,19 +169,17 @@ void Odometer::set_turns(int value) {
 }
 
 /*
- * ISR of the reflective optical encoder. Since the encoder is printed in two pieces of ABS, 
- * the transitions from light to black are not abrup and generate several pulses (approximately 400 uS).
+ * ISR of the reflective optical encoder. 
+ * Since the encoder is printed in two pieces of ABS, the transitions from light to black 
+ * are not sharp and generate several pulses (approximately 400 uS).
  * To filter them, it was decided to enable the IRQ on both edges and filter the pulses that last less 
  * than 5mS, since turning the spool quickly by hand the minimum duration of the pulses is 10mS.
  * The ISR generates the signal to turn on the PID, when it counts 10 pulses (almost one turn of the roller), 
  * which are separated by a maximum of 500 mS.
  */
 void Odometer::handle_isr() {
-unsigned long now;
- 
-  now = millis();
-  
-  unsigned long elapsed_time = now - last_pulse_time;
+unsigned long now = millis();
+unsigned long elapsed_time = now - last_pulse_time;
 
   if (elapsed_time >= ODOM_DETECTION_TIME_MIN) {
     last_pulse_time = now;
