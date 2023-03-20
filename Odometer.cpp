@@ -47,7 +47,7 @@ Odometer::Odometer(int pin, ParamStorage& storage) :
 
 bool Odometer::begin(callback_odom_start_t c_start, callback_odom_stop_t c_stop) {
   pinMode(do_pin, INPUT_PULLUP);
-  attachInterrupt(do_pin, isr_data, FALLING); //RISING); //CHANGE); //FALLING);
+  attachInterrupt(do_pin, isr_data, CHANGE); 
 
   odom_start = c_start;
   odom_stop = c_stop;
@@ -65,6 +65,7 @@ bool Odometer::update(bool pid_on, bool lid_open) {
 unsigned long now = millis(); 
 unsigned long elapsed_time = (now - start_time);
 
+  // If the door is open or a transition was detected in the PID state, it resets the start signal sent by the ISR.
   if ((last_pid_state != pid_on) || lid_open) {
     start_turns = 0;
     pid_start = false;  
@@ -74,11 +75,7 @@ unsigned long elapsed_time = (now - start_time);
   
   if (!pid_on) {
     if ((pstorage.odom_mode() == ODOM_MODE_START) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
-      /* 
-       * Waits for a single turn to elapse and that it is within the time window (50-500 mS) 
-       * to be considered valid. If it detects two or more turns, it discards them. Prevents 
-       * bumps in the box from generating a false start. Waits 5 pulses to turn on the equipment.
-       */
+      // Turn on the PID, when the ISR sends the signal and the door box is closed.
       if (pid_start && !lid_open) {
         odom_start();
       }
@@ -87,6 +84,7 @@ unsigned long elapsed_time = (now - start_time);
     }
   } else {  
     if ((pstorage.odom_mode() == ODOM_MODE_STOP) || (pstorage.odom_mode() == ODOM_MODE_BOTH)) {
+      // When the set idle time expires, turn off the heater.
       if (last_turns == pstorage.odom_turns()) {
         if ((pstorage.odom_minutes() * ODOM_60_MINUTES_TO_MILLIS) <= elapsed_time) {
           odom_stop();
@@ -170,20 +168,27 @@ void Odometer::set_turns(int value) {
   }   
 }
 
+/*
+ * ISR of the reflective optical encoder. Since the encoder is printed in two pieces of ABS, 
+ * the transitions from light to black are not abrup and generate several pulses (approximately 400 uS).
+ * To filter them, it was decided to enable the IRQ on both edges and filter the pulses that last less 
+ * than 5mS, since turning the spool quickly by hand the minimum duration of the pulses is 10mS.
+ * The ISR generates the signal to turn on the PID, when it counts 10 pulses (almost one turn of the roller), 
+ * which are separated by a maximum of 500 mS.
+ */
 void Odometer::handle_isr() {
 unsigned long now;
-
-  if (digitalRead(do_pin) == LOW) {
-    now = millis();
  
+  now = millis();
+  
+  unsigned long elapsed_time = now - last_pulse_time;
+
+  if (elapsed_time >= ODOM_DETECTION_TIME_MIN) {
+    last_pulse_time = now;
+
     pstorage.write_odom_turns(pstorage.odom_turns() + 1);
-  
-    unsigned long elapsed_time = now - last_pulse_time;
-  
-    if ((elapsed_time >= ODOM_DETECTION_TIME_MIN) && 
-        (elapsed_time <= ODOM_DETECTION_TIME_MAX)) {
-      start_turns++;
-  
+
+    if (elapsed_time <= ODOM_DETECTION_TIME_MAX) {
       if (++start_turns >= ODOM_DETECTION_COUNT) {
         pid_start = true;  
         start_turns = 0;
@@ -191,8 +196,6 @@ unsigned long now;
     } else {
       start_turns = 0;  
     }
-    
-    last_pulse_time = now;
   }
 } 
 

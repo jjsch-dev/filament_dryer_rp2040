@@ -47,11 +47,12 @@
 #define ODOM_DIAMETER_DEFAULT     200   // Min 200 mm
 
 #define ODOM_ENCODER_DIAMETER     13.7  // The theoretical diameter is 13.9, the print may differ by a few tenths.
-#define ODOM_PULSES_BY_TURNS      6     // The enconder have 6 pulses by laps.
+#define ODOM_PULSES_BY_TURNS      12    // The encoder has 6 black marks but generates 12 pulses per turn, 
+                                        // because the IRQ triggers on both edges.
 
-#define ODOM_DETECTION_TIME_MIN   50
+#define ODOM_DETECTION_TIME_MIN   5
 #define ODOM_DETECTION_TIME_MAX   500
-#define ODOM_DETECTION_COUNT      5
+#define ODOM_DETECTION_COUNT      10    // 12 pulses are equivalent to one turn on the encoder.
 #define ODOM_60_MINUTES_TO_MILLIS 60000
         
 typedef void (*callback_odom_start_t)(void);
