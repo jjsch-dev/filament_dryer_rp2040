@@ -122,6 +122,11 @@ void Odometer::set_mode(int value) {
   
   if ((new_val >= ODOM_MODE_DISABLED) && (new_val <= ODOM_MODE_BOTH)) {
     pstorage.write_odom_mode(new_val);
+
+    // Resets the automatic start of the heater, in case the odometer has 
+    // already detected an event, which would generate a false start.
+    start_turns = 0;
+    pid_start = false; 
   }   
 }
 
