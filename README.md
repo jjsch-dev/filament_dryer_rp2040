@@ -12,6 +12,7 @@ This project is a dehumidifier for 3D printer filaments that uses Arduino and Ra
 
 The project uses a Raspberry Pi Pico instead of an Arduino Nano because it has more RAM and flash memory, which are needed for storing data and running complex algorithms.
 
+I worked on the development of this project alongside with my friend [Manuel](https://www.printables.com/@ManuelM). He made the 3D model design of the enclosure and all its printable components. Plese use the following link [DIY Dehumidifier for 3D Printer Filaments](https://www.printables.com/model/494417-diy-dehumidifier-for-3d-printer-filaments) to get the step and the 3mf files.
 
 ![alt text](images/prototype-front.png)
 
